@@ -19,6 +19,7 @@ from src.downloader.sources import (
 )
 from src.downloader.uptodown import UptoDown
 from src.exceptions import DownloadError
+import os
 
 
 class DownloaderFactory(object):
@@ -26,13 +27,254 @@ class DownloaderFactory(object):
 
     @staticmethod
     def create_downloader(config: RevancedConfig, apk_source: str) -> Downloader:
-        """Returns appropriate downloader.
-
+        """
+        Returns appropriate downloader.
         Args:
         ----
             config : Config
             apk_source : Source URL for APK
         """
+
+        appMap = {
+            'Amazon Shopping': {
+                'package': 'com.amazon.mShop.android.shopping',
+                'org': 'amazon-mobile-llc',
+                'repo': 'amazon-shopping'
+            },
+            'Backdrops': {
+                'package': 'com.backdrops.wallpapers',
+                'org': 'backdrops',
+                'repo': 'backdrops-wallpapers',
+                'arch': 'noarch'
+            },
+            'CandyLink VPN': {
+                'package': 'com.candylink.openvpn',
+                'org': 'liondev-io',
+                'repo': 'candylink-vpn',
+                'arch': 'universal'
+            },
+            'Facebook': {
+                'package': 'com.facebook.katana',
+                'org': 'facebook-2',
+                'repo': 'facebook'
+            },
+            'Icon Pack Studio': {
+                'package': 'ginlemon.iconpackstudio',
+                'org': 'smart-launcher-team',
+                'repo': 'icon-pack-studio',
+                'arch': 'noarch'
+            },
+            'Infinity for Reddit': {
+                'package': 'ml.docilealligator.infinityforreddit',
+                'org': 'docile-alligator',
+                'repo': 'infinity-for-reddit',
+                'arch': 'universal'
+            },
+            'Inshorts': {
+                'package': 'com.nis.app',
+                'org': 'inshorts-formerly-news-in-shorts',
+                'repo': 'inshorts-news-in-60-words-2'
+            },
+            'Instagram': {
+                'package': 'com.instagram.android',
+                'org': 'instagram',
+                'repo': 'instagram-instagram'
+            },
+            'irplus': {
+                'package': 'net.binarymode.android.irplus',
+                'org': 'binarymode',
+                'repo': 'irplus-infrared-remote',
+                'arch': 'noarch'
+            },
+            'Lightroom': {
+                'package': 'com.adobe.lrmobile',
+                'org': 'adobe',
+                'repo': 'lightroom'
+            },
+            'Meme Generator': {
+                'package': 'com.zombodroid.MemeGenerator',
+                'org': 'zombodroid',
+                'repo': 'meme-generator-free',
+                'arch': 'universal'
+            },
+            'Messenger': {
+                'package': 'com.facebook.orca',
+                'org': 'facebook-2',
+                'repo': 'messenger'
+            },
+            'Mi Fitness': {
+                'package': 'com.xiaomi.wearable',
+                'org': 'beijing-xiaomi-mobile-software-co-ltd',
+                'repo': 'mi-wear-fit',
+                'arch': 'universal'
+            },
+            'MyFitnessPal': {
+                'package': 'com.myfitnesspal.android',
+                'org': 'myfitnesspal-inc',
+                'repo': 'calorie-counter-myfitnesspal',
+                'arch': 'universal'
+            },
+            'NetGuard': {
+                'package': 'eu.faircode.netguard',
+                'org': 'marcel-bokhorst',
+                'repo': 'netguard-no-root-firewall',
+                'arch': 'universal'
+            },
+            'Nyx Music Player': {
+                'package': 'com.awedea.nyx',
+                'org': 'awedea',
+                'repo': 'nyx-music-player',
+                'arch': 'universal'
+            },
+            'pixiv': {
+                'package': 'jp.pxv.android',
+                'org': 'pixiv-inc',
+                'repo': 'pixiv',
+                'arch': 'noarch'
+            },
+            'Photomath': {
+                'package': 'com.microblink.photomath',
+                'org': 'google-inc',
+                'repo': 'photomath',
+                'arch': 'universal'
+            },
+            'Recorder': {
+                'package': 'com.google.android.apps.recorder',
+                'org': 'google-inc',
+                'repo': 'google-recorder'
+            },
+            'Reddit': {
+                'package': 'com.reddit.frontpage',
+                'org': 'redditinc',
+                'repo': 'reddit',
+                'arch': 'universal'
+            },
+            'Solid Explorer': {
+                'package': 'pl.solidexplorer2',
+                'org': 'neatbytes',
+                'repo': 'solid-explorer-beta'
+            },
+            'Sony Headphones Connect': {
+                'package': 'com.sony.songpal.mdr',
+                'org': 'sony-corporation',
+                'repo': 'sony-headphones-connect'
+            },
+            'Strava': {
+                'package': 'com.strava',
+                'org': 'strava-inc',
+                'repo': 'strava-running-and-cycling-gps',
+                'arch': 'universal'
+            },
+            'Sync for Lemmy': {
+                'package': 'io.syncapps.lemmy_sync',
+                'org': 'sync-apps-ltd',
+                'repo': 'sync-for-lemmy'
+            },
+            'TickTick': {
+                'package': 'com.ticktick.task',
+                'org': 'ticktick-limited',
+                'repo': 'ticktick-to-do-list-with-reminder-day-planner'
+            },
+            'TikTok': {
+                'package': 'com.ss.android.ugc.trill',
+                'org': 'tiktok-pte-ltd',
+                'repo': 'tik-tok'
+            },
+            'Trakt': {
+                'package': 'tv.trakt.trakt',
+                'org': 'trakt',
+                'repo': 'trakt',
+                'arch': 'universal'
+            },
+            'Tumblr': {
+                'package': 'com.tumblr',
+                'org': 'tumblr-inc',
+                'repo': 'tumblr',
+                'arch': 'universal'
+            },
+            'Twitch': {
+                'package': 'tv.twitch.android.app',
+                'org': 'twitch-interactive-inc',
+                'repo': 'twitch',
+                'arch': 'universal'
+            },
+            'WarnWetter': {
+                'package': 'de.dwd.warnapp',
+                'org': 'deutscher-wetterdienst',
+                'repo': 'warnwetter',
+                'arch': 'universal'
+            },
+            'Windy.app': {
+                'package': 'co.windyapp.android',
+                'org': 'windy-weather-world-inc',
+                'repo': 'windy-wind-weather-forecast',
+                'arch': 'universal'
+            },
+            'X': {
+                'package': 'com.twitter.android',
+                'org': 'x-corp',
+                'repo': 'twitter',
+                'arch': 'universal'
+            },
+            'Youtube': {
+                'package': 'com.google.android.youtube',
+                'org': 'google-inc',
+                'repo': 'youtube'
+            },
+            'Youtube Music': {
+                'package': 'com.google.android.apps.youtube.music',
+                'org': 'google-inc',
+                'repo': 'youtube-music'
+            },
+            'Yuka': {
+                'package': 'io.yuka.android',
+                'org': 'yuka-apps',
+                'repo': 'yuka-food-cosmetic-scan',
+                'arch': 'universal'
+            }
+        }
+        
+        # Check if apk_source is in our appMap for special handling with shell script
+        if apk_source in appMap:
+            # Attempt to use shell script for download, fall back to system if it fails
+            try:
+                # Import here to avoid circular imports
+                from subprocess import run
+                import os
+
+                script_path = os.path.join(os.path.dirname(__file__), "script.sh")
+
+                # Check if script exists
+                if os.path.exists(script_path):
+                    # Prepare arguments for the script
+                    org = appMap[apk_source]['org']
+                    repo = appMap[apk_source]['repo']
+                    package = appMap[apk_source]['package']
+
+                    # Try to run the script with apkmirror first
+                    result = run([
+                        "bash", script_path, "apkmirror", org, repo, package
+                    ], check=False, capture_output=True, text=True)
+
+                    # If apkmirror fails, try apkcombo
+                    if result.returncode != 0:
+                        result = run([
+                            "bash", script_path, "apkcombo", org, repo, package
+                        ], check=False, capture_output=True, text=True)
+
+                    # If script execution was successful, we can return a generic downloader
+                    # or we could check if the APK was actually downloaded
+                    if result.returncode == 0:
+                        # The script ran successfully, return appropriate downloader
+                        # For now, we'll fall back to the standard APKMirror downloader
+                        # since the script should have handled the download
+                        from src.downloader.apkmirror import ApkMirror
+                        return ApkMirror(config)
+            except Exception:
+                # If shell script approach fails, fall back to system downloaders below
+                pass
+
+        # Fallback to standard downloaders
         if apk_source.startswith(GITHUB_BASE_URL):
             return Github(config)
         if apk_source.startswith(APK_PURE_BASE_URL):
@@ -47,5 +289,7 @@ class DownloaderFactory(object):
             return ApkMonk(config)
         if apk_source.startswith(APKEEP):
             return Apkeep(config)
+        if apk_source == '':
+            return Downloader(config)
         msg = "No download factory found."
         raise DownloadError(msg, url=apk_source)

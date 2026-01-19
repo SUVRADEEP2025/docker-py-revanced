@@ -15,7 +15,7 @@ from src.utils import bs4_parser, contains_any_word, handle_request_response, re
 
 class ApkMirror(Downloader):
     """Files downloader."""
-
+    
     def _extract_force_download_link(self: Self, link: str, app: str) -> tuple[str, str]:
         """Extract force download link."""
         link_page_source = self._extract_source(link)
