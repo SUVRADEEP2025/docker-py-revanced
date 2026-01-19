@@ -7,10 +7,6 @@ updates:
       interval: "daily"
     labels:
       - dependencies🫂
-    assignees:
-      - "nikhilbadyal"
-    reviewers:
-      - "nikhilbadyal"
 
   - package-ecosystem: "docker"
     directory: "/"
@@ -18,18 +14,9 @@ updates:
       interval: "daily"
     labels:
       - dependencies🫂
-    assignees:
-      - "nikhilbadyal"
-    reviewers:
-      - "nikhilbadyal"
-
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "daily"
     labels:
       - dependencies🫂
-    assignees:
-      - "nikhilbadyal"
-    reviewers:
-        - "nikhilbadyal"
