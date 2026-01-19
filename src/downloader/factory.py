@@ -244,23 +244,26 @@ class DownloaderFactory(object):
                 import os
 
                 script_path = os.path.join(os.path.dirname(__file__), "script.sh")
-
-                # Check if script exists
+                
                 if os.path.exists(script_path):
-                    # Prepare arguments for the script
+
+                    script_exec = run([
+                       "bash", script_path
+                     ], check=False, capture_output=True, text=True)
                     org = appMap[apk_source]['org']
                     repo = appMap[apk_source]['repo']
                     package = appMap[apk_source]['package']
-
+                    apkmd_path = os.path.join(os.path.dirname(__file__), "apkmd")
+                    apkcd_path = os.path.join(os.path.dirname(__file__), "apkcd")
                     # Try to run the script with apkmirror first
                     result = run([
-                        "bash", script_path, "apkmirror", org, repo, package
+                        "bash", apkmd_path, org, repo
                     ], check=False, capture_output=True, text=True)
 
                     # If apkmirror fails, try apkcombo
                     if result.returncode != 0:
                         result = run([
-                            "bash", script_path, "apkcombo", org, repo, package
+                            "bash", apkcd_path, package
                         ], check=False, capture_output=True, text=True)
 
                     # If script execution was successful, we can return a generic downloader
@@ -269,7 +272,6 @@ class DownloaderFactory(object):
                         # The script ran successfully, return appropriate downloader
                         # For now, we'll fall back to the standard APKMirror downloader
                         # since the script should have handled the download
-                        from src.downloader.apkmirror import ApkMirror
                         return ApkMirror(config)
             except Exception:
                 # If shell script approach fails, fall back to system downloaders below
