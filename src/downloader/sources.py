@@ -22,6 +22,7 @@ APK_MONK_BASE_URL = "https://www.apkmonk.com"
 APKEEP = "apkeep"
 APK_MONK_APK_URL = APK_MONK_BASE_URL + "/app/{}/"
 APK_MONK_ICON_URL = "https://cdn.apkmonk.com/logos/{}"
+# Define primary sources for apps
 apk_sources = {
     "backdrops": f"{APK_MIRROR_BASE_APK_URL}/backdrops/backdrops-wallpapers/",
     "bacon": f"{APK_MIRROR_BASE_APK_URL}/onelouder-apps/baconreader-for-reddit/",
@@ -98,4 +99,19 @@ apk_sources = {
     "cieid": f"{APK_MIRROR_BASE_APK_URL}/istituto-poligrafico-e-zecca-dello-stato-s-p-a/cieid/",
     "infinity-for-reddit-patreon": f"{APK_MIRROR_BASE_APK_URL}/docile-alligator/infinity-for-reddit-patreon-github-version/",  # noqa: E501
     "infinity-for-reddit-plus": f"{APK_MIRROR_BASE_APK_URL}/docile-alligator/infinity-for-reddit-plus/",
+}
+
+# Define fallback sources for apps - each entry is a comma-separated list of sources in priority order
+apk_fallback_sources = {
+    # For YouTube, try multiple sources in order
+    "youtube": f"{APK_MIRROR_BASE_APK_URL}/google-inc/youtube/,https://github.com/revanced/revanced-integrations/releases/latest,youtube.en.uptodown.com/android",
+
+    # For YouTube Music
+    "youtube_music": f"{APK_MIRROR_BASE_APK_URL}/google-inc/youtube-music/,https://music.youtube.com,youtube-music.en.uptodown.com/android",
+
+    # For other apps, you can define similar fallback chains
+    "reddit": f"{APK_MIRROR_BASE_APK_URL}/redditinc/reddit/,reddit.en.uptodown.com/android,https://github.com/revanced/revanced-patches/releases/latest",
+
+    # Generic fallback for other apps
+    "default_fallback": f"{APK_MIRROR_BASE_URL},{UPTODOWN_BASE_URL.format('default')},{APK_PURE_BASE_URL}",
 }

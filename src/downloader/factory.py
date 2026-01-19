@@ -10,6 +10,7 @@ from src.downloader.apksos import ApkSos
 from src.downloader.download import Downloader
 from src.downloader.github import Github
 from src.downloader.sources import (
+    APK_MIRROR_BASE_APK_URL,
     APK_MIRROR_BASE_URL,
     APK_MONK_BASE_URL,
     APK_PURE_BASE_URL,
@@ -280,6 +281,10 @@ class DownloaderFactory(object):
             except Exception:
                 # If shell script approach fails, fall back to system downloaders below
                 pass
+            
+            # Fallback for appMap entries: try to use standard ApkMirror URL
+            if apk_source in appMap and 'org' in appMap[apk_source] and 'repo' in appMap[apk_source]:
+                apk_source = f"{APK_MIRROR_BASE_APK_URL}/{appMap[apk_source]['org']}/{appMap[apk_source]['repo']}/"
 
         # Fallback to standard downloaders
         if apk_source.startswith(GITHUB_BASE_URL):
