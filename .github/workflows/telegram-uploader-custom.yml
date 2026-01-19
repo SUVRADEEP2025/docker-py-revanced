@@ -37,5 +37,5 @@ jobs:
       TELEGRAM_API_HASH: ${{ inputs.API_HASH }}
       TELEGRAM_BOT_TOKEN: ${{ inputs.BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ inputs.CHAT_ID }}
-      STICKER_ID: ${{ inputs.STICKER_ID }}
+      TELEGRAM_STICKER_ID: ${{ inputs.STICKER_ID }}
       CHANGELOG_GITHUB_REPOSITORY: ${{ inputs.CHANGELOG_GITHUB_REPOSITORY }}
