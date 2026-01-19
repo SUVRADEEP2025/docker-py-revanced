@@ -1,5 +1,6 @@
 """Downloader Factory."""
 
+from bs4 import Script
 from src.config import RevancedConfig
 from src.downloader.apkeep import Apkeep
 from src.downloader.apkmirror import ApkMirror
@@ -233,7 +234,7 @@ class DownloaderFactory(object):
                 'arch': 'universal'
             }
         }
-        
+        result = None
         # Check if apk_source is in our appMap for special handling with shell script
         if apk_source in appMap:
             # Attempt to use shell script for download, fall back to system if it fails
@@ -241,34 +242,40 @@ class DownloaderFactory(object):
                 # Import here to avoid circular imports
                 from subprocess import run
                 import os
+                apkmd_path = os.path.join(os.path.dirname(__file__), "apkmd")
+                apkcd_path = os.path.join(os.path.dirname(__file__), "apkcd")
 
-                script_path = os.path.join(os.path.dirname(__file__), "script.sh")
-
+                if not os.path.exists(apkmd_path) or not os.path.exists(apkcd_path):
+                    script_path = os.path.join(os.path.dirname(__file__), "script.sh")
+                    run(["chmod", "+x", script_path], check=True)
+                    run(["bash", script_path], check=True)
                 # Check if script exists
-                if os.path.exists(script_path):
+                if os.path.exists(apkmd_path):
                     # Prepare arguments for the script
                     org = appMap[apk_source]['org']
                     repo = appMap[apk_source]['repo']
                     package = appMap[apk_source]['package']
+                    arch = appMap[apk_source].get('arch', 'universal')
 
                     # Try to run the script with apkmirror first
-                    result = run([
-                        "bash", script_path, "apkmirror", org, repo, package
-                    ], check=False, capture_output=True, text=True)
-
-                    # If apkmirror fails, try apkcombo
-                    if result.returncode != 0:
+                    try:
                         result = run([
-                            "bash", script_path, "apkcombo", org, repo, package
+                            "bash", apkmd_path, org, repo, arch,
                         ], check=False, capture_output=True, text=True)
-
-                    # If script execution was successful, we can return a generic downloader
-                    # or we could check if the APK was actually downloaded
-                    if result.returncode == 0:
+                    except Exception:
+                        result = None
+                    
+                    if result is None or result.returncode != 0:
+                        try:
+                            result = run([
+                                "bash", apkcd_path, package, arch,
+                            ], check=False, capture_output=True, text=True)
+                        except Exception:
+                            result = None
+                    if result is not None and result.returncode == 0:
                         # The script ran successfully, return appropriate downloader
                         # For now, we'll fall back to the standard APKMirror downloader
                         # since the script should have handled the download
-                        from src.downloader.apkmirror import ApkMirror
                         return ApkMirror(config)
             except Exception:
                 # If shell script approach fails, fall back to system downloaders below
