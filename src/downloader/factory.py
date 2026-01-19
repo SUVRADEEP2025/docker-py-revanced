@@ -65,12 +65,6 @@ class DownloaderFactory(object):
                 'repo': 'icon-pack-studio',
                 'arch': 'noarch'
             },
-            'Infinity for Reddit': {
-                'package': 'ml.docilealligator.infinityforreddit',
-                'org': 'docile-alligator',
-                'repo': 'infinity-for-reddit',
-                'arch': 'universal'
-            },
             'Inshorts': {
                 'package': 'com.nis.app',
                 'org': 'inshorts-formerly-news-in-shorts',
@@ -255,31 +249,18 @@ class DownloaderFactory(object):
                     package = appMap[apk_source]['package']
                     apkmd_path = os.path.join(os.path.dirname(__file__), "apkmd")
                     apkcd_path = os.path.join(os.path.dirname(__file__), "apkcd")
-                    # Try to run the script with apkmirror first
-                    result = run([
-                        "bash", apkmd_path, org, repo
-                    ], check=False, capture_output=True, text=True)
-
-                    # If apkmirror fails, try apkcombo
-                    if result.returncode != 0:
+                    try:
                         result = run([
-                            "bash", apkcd_path, package
+                        "bash", apkmd_path, org, repo
                         ], check=False, capture_output=True, text=True)
-
-                    # If script execution was successful, we can return a generic downloader
-                    # or we could check if the APK was actually downloaded
-                    if result.returncode == 0:
-                        # The script ran successfully, return appropriate downloader
-                        # For now, we'll fall back to the standard APKMirror downloader
-                        # since the script should have handled the download
-                        return ApkMirror(config)
+                    except Exception:
+                        result = run([
+                        "bash", apkcd_path, package
+                        ], check=False, capture_output=True, text=True)
+                    return ApkMirror(config)
             except Exception:
-                # If shell script approach fails, fall back to system downloaders below
-                pass
-            
-            # Fallback for appMap entries: try to use standard ApkMirror URL
-            if apk_source in appMap and 'org' in appMap[apk_source] and 'repo' in appMap[apk_source]:
-                apk_source = f"{APK_MIRROR_BASE_APK_URL}/{appMap[apk_source]['org']}/{appMap[apk_source]['repo']}/"
+                if apk_source in appMap and 'org' in appMap[apk_source] and 'repo' in appMap[apk_source]:
+                    apk_source = f"{APK_MIRROR_BASE_URL}/{appMap[apk_source]['org']}/{appMap[apk_source]['repo']}/"
 
         # Fallback to standard downloaders
         if apk_source.startswith(GITHUB_BASE_URL):
