@@ -1,5 +1,6 @@
 """Downloader Factory."""
 
+from bs4 import Script
 from src.config import RevancedConfig
 from src.downloader.apkeep import Apkeep
 from src.downloader.apkmirror import ApkMirror
@@ -64,6 +65,12 @@ class DownloaderFactory(object):
                 'org': 'smart-launcher-team',
                 'repo': 'icon-pack-studio',
                 'arch': 'noarch'
+            },
+            'Infinity for Reddit': {
+                'package': 'ml.docilealligator.infinityforreddit',
+                'org': 'docile-alligator',
+                'repo': 'infinity-for-reddit',
+                'arch': 'universal'
             },
             'Inshorts': {
                 'package': 'com.nis.app',
@@ -228,7 +235,7 @@ class DownloaderFactory(object):
                 'arch': 'universal'
             }
         }
-        
+        result = None
         # Check if apk_source is in our appMap for special handling with shell script
         if apk_source in appMap:
             # Attempt to use shell script for download, fall back to system if it fails
