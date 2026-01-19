@@ -15,7 +15,7 @@ on:
         description: "Upload Non Rooted APKs to Telegram"
         required: false
         type: boolean
-        default: false
+        default: true
       TELEGRAM_ROOT_UPLOAD:
         description: "Upload Magisk Module from nikhilbadyal/revanced-magisk-module to Telegram"
         required: false
@@ -40,7 +40,7 @@ on:
         type: boolean
         description: 'Run the build with tmate debugging enabled.'
         required: false
-        default: false
+        default: true
       PREFERRED_PATCH_APPS:
         description: "Apps to be patched. Overrides any env set"
         required: false
@@ -56,7 +56,7 @@ on:
         description: "Upload Non Rooted APKs to Telegram"
         required: false
         type: boolean
-        default: false
+        default: true
       TELEGRAM_ROOT_UPLOAD:
         description: "Upload Magisk Module from nikhilbadyal/revanced-magisk-module to Telegram"
         required: false
