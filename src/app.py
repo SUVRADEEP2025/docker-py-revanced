@@ -60,7 +60,7 @@ class APP(object):
             if fallback_key in apk_fallback_sources:
                 self.download_sources = [source.strip() for source in apk_fallback_sources[fallback_key].split(",") if source.strip()]
             else:
-                self.download_sources = []
+                self.download_sources = []  # Initialize download_sources
         self.package_name = package_name
         self.old_key = config.env.bool(f"{app_name}_OLD_KEY".upper(), config.global_old_key)
         self.patches: list[dict[Any, Any]] = []
@@ -68,6 +68,7 @@ class APP(object):
             f"{app_name}_SPACE_FORMATTED_PATCHES".upper(),
             config.global_space_formatted,
         )
+        self.download_source = self.download_sources[0] if self.download_sources else None  # Set download_source
 
     def download_apk_for_patching(
         self: Self,
