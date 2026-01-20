@@ -1,6 +1,7 @@
 """Github Manager."""
 
 import json
+import urllib.error
 import urllib.request
 from pathlib import Path
 from typing import Self
