@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Self
 
 from environs import Env
+from loguru import logger
 
 from src.app import APP
 from src.manager.release_manager import ReleaseManager
