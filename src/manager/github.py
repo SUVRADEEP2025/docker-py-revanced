@@ -50,11 +50,13 @@ class GitHubManager(ReleaseManager):
             else:
                 with urllib.request.urlopen(self.update_file_url) as url:
                     data = json.load(url)
-            if app.app_name in data and (resource := data[app.app_name][app_dump_key].get(resource_name)):
-                if isinstance(resource, list):
-                    return resource
-                return str(resource)
-        except (urllib.error.HTTPError, FileNotFoundError, KeyError):
-            # Return default value if updates file doesn't exist or data is missing (fresh build)
+            if app.app_name in data:
+                app_dump = data[app.app_name].get(app_dump_key, {})
+                if resource := app_dump.get(resource_name):
+                    if isinstance(resource, list):
+                        return resource
+                    return str(resource)
+        except (urllib.error.HTTPError, FileNotFoundError):
+            # Return default value if updates file doesn't exist (fresh build)
             pass
         return "0"
