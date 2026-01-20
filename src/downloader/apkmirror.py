@@ -15,7 +15,7 @@ from src.utils import bs4_parser, contains_any_word, handle_request_response, re
 
 class ApkMirror(Downloader):
     """Files downloader."""
-    
+
     def _extract_force_download_link(self: Self, link: str, app: str) -> tuple[str, str]:
         """Extract force download link."""
         link_page_source = self._extract_source(link)
@@ -103,6 +103,9 @@ class ApkMirror(Downloader):
         if not main_page:
             version = version.replace(".", "-")
             apk_main_page = app.download_source
+            if apk_main_page is None:
+                msg = f"No download source available for {app.app_name}"
+                raise APKMirrorAPKDownloadError(msg, url="")
             version_page = apk_main_page + apk_main_page.split("/")[-2]
             main_page = f"{version_page}-{version}-release/"
         download_page = self.get_download_page(main_page)
@@ -124,6 +127,9 @@ class ApkMirror(Downloader):
         :return: Version of downloaded apk
         """
         app_main_page = app.download_source
+        if app_main_page is None:
+            msg = f"No download source available for {app.app_name}"
+            raise APKMirrorAPKDownloadError(msg, url="")
         versions_div = self._extracted_search_div(app_main_page, "listWidget p-relative")
         app_rows = versions_div.find_all(class_="appRow")
         version_urls = [
