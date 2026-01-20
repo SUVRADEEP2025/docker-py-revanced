@@ -121,6 +121,8 @@ class APP(object):
                             return
 
                         logger.info(f"Cache miss for {self.app_name} ({self.app_version}) from source {source}. Proceeding with download.")
+                        # Set download_source to current source before calling downloader
+                        self.download_source = source
                         downloader = DownloaderFactory.create_downloader(config=config, apk_source=source)
                         self.download_file_name, self.download_dl = downloader.download(self.app_version, self)
 
@@ -130,16 +132,15 @@ class APP(object):
                         return  # Success, exit the loop
 
                 except Exception as e:
-                    logger.warning(f"Download from source {source} failed: {str(e)}")
+                    logger.warning(f"Download from source {source} failed: {e!s}")
                     last_exception = e
                     continue  # Try the next source
 
             # If we get here, all sources failed
             if last_exception:
                 raise last_exception
-            else:
-                msg = f"All download sources failed for {self.app_name}"
-                raise DownloadError(msg)
+            msg = f"All download sources failed for {self.app_name}"
+            raise DownloadError(msg)
 
     def get_download_cache_key(self: Self) -> tuple[str, str]:
         """Generate a unique cache key for APK downloads.
