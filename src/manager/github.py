@@ -57,7 +57,7 @@ class GitHubManager(ReleaseManager):
                     if isinstance(resource, list):
                         return resource
                     return str(resource)
-        except (urllib.error.HTTPError, FileNotFoundError):
+        except (urllib.error.HTTPError, FileNotFoundError, json.JSONDecodeError):
             # Return default value if updates file doesn't exist (fresh build)
-            pass
+            logger.info("Could not retrieve or parse updates.json, assuming fresh build.")
         return "0"
