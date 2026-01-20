@@ -25,28 +25,36 @@ class GitHubManager(ReleaseManager):
 
     def get_last_version(self: Self, app: APP, resource_name: str) -> str | list[str]:
         """Get last patched version."""
-        if self.is_dry_run:
-            with Path(updates_file).open() as url:
-                data = json.load(url)
-        else:
-            with urllib.request.urlopen(self.update_file_url) as url:
-                data = json.load(url)
-        if app.app_name in data and (resource := data[app.app_name].get(resource_name)):
-            if isinstance(resource, list):
-                return resource
-            return str(resource)
+        try:
+            if self.is_dry_run:
+                with Path(updates_file).open() as url:
+                    data = json.load(url)
+            else:
+                with urllib.request.urlopen(self.update_file_url) as url:
+                    data = json.load(url)
+            if app.app_name in data and (resource := data[app.app_name].get(resource_name)):
+                if isinstance(resource, list):
+                    return resource
+                return str(resource)
+        except (urllib.error.HTTPError, FileNotFoundError):
+            # Return default value if updates file doesn't exist (fresh build)
+            pass
         return "0"
 
     def get_last_version_source(self: Self, app: APP, resource_name: str) -> str | list[str]:
         """Get last patched version."""
-        if self.is_dry_run:
-            with Path(updates_file).open() as url:
-                data = json.load(url)
-        else:
-            with urllib.request.urlopen(self.update_file_url) as url:
-                data = json.load(url)
-        if app.app_name in data and (resource := data[app.app_name][app_dump_key].get(resource_name)):
-            if isinstance(resource, list):
-                return resource
-            return str(resource)
+        try:
+            if self.is_dry_run:
+                with Path(updates_file).open() as url:
+                    data = json.load(url)
+            else:
+                with urllib.request.urlopen(self.update_file_url) as url:
+                    data = json.load(url)
+            if app.app_name in data and (resource := data[app.app_name][app_dump_key].get(resource_name)):
+                if isinstance(resource, list):
+                    return resource
+                return str(resource)
+        except (urllib.error.HTTPError, FileNotFoundError, KeyError):
+            # Return default value if updates file doesn't exist or data is missing (fresh build)
+            pass
         return "0"
