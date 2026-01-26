@@ -40,7 +40,7 @@ class AppBuildInfo:
             return f"[FRESH] No previous build -> {versions}"
 
         if self.reason == BuildReason.VERSION_UPDATE:
-            changes = []
+            changes: list[str] = []
             for old, new in zip(self.old_versions, self.new_versions, strict=False):
                 if old != new:
                     changes.append(f"{old} -> {new}")

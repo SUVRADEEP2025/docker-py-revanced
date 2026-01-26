@@ -8,10 +8,10 @@ import requests
 from bs4 import BeautifulSoup
 from loguru import logger
 
-from src.app import APP
-from src.downloader.download import Downloader
-from src.exceptions import APKPureAPKDownloadError
-from src.utils import bs4_parser, handle_request_response, request_header, request_timeout, slugify
+from ..app import APP
+from .download import Downloader
+from ..exceptions import APKPureAPKDownloadError
+from ..utils import bs4_parser, handle_request_response, request_header, request_timeout, slugify
 
 
 class ApkPure(Downloader):
@@ -127,6 +127,8 @@ class ApkPure(Downloader):
             If the specified version is not found.
         """
         self.global_archs_priority = tuple(self._sort_by_priority(app.archs_to_build))
+        if not app.download_source:
+            raise APKPureAPKDownloadError("Download source is missing", url="")
         version_page = f"{app.download_source}/versions"
 
         response = requests.get(version_page, headers=request_header, timeout=request_timeout)
@@ -162,6 +164,8 @@ class ApkPure(Downloader):
         :return: Tuple of filename and app direct download link
         """
         self.global_archs_priority = tuple(self._sort_by_priority(app.archs_to_build))
+        if not app.download_source:
+            raise APKPureAPKDownloadError("Download source is missing", url="")
         download_page = app.download_source + "/download"
         file_name, download_source = self.extract_download_link(download_page, app.app_name)
         app.app_version = self.app_version

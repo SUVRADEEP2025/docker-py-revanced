@@ -1,6 +1,6 @@
 """Class to represent apk to be patched."""
 
-import concurrent
+import concurrent.futures
 import hashlib
 import pathlib
 from concurrent.futures import ThreadPoolExecutor
@@ -11,10 +11,10 @@ from zoneinfo import ZoneInfo
 
 from loguru import logger
 
-from src.config import RevancedConfig
-from src.downloader.sources import APKEEP, apk_sources
-from src.exceptions import BuilderError, DownloadError, PatchingFailedError
-from src.utils import slugify, time_zone
+from .config import RevancedConfig
+from .downloader.sources import APKEEP, apk_sources
+from .exceptions import BuilderError, DownloadError, PatchingFailedError
+from .utils import slugify, time_zone
 
 
 class APP(object):
@@ -55,7 +55,7 @@ class APP(object):
             self.download_sources = [source.strip() for source in download_sources_raw.split(",") if source.strip()]
         else:
             # Check if there are predefined fallback sources for this app
-            from src.downloader.sources import apk_fallback_sources
+            from .downloader.sources import apk_fallback_sources
             fallback_key = app_name.lower()
             if fallback_key in apk_fallback_sources:
                 self.download_sources = [source.strip() for source in apk_fallback_sources[fallback_key].split(",") if source.strip()]
@@ -77,8 +77,9 @@ class APP(object):
         download_lock: Lock,
     ) -> None:
         """Download apk to be patched, skipping if already downloaded (matching source and version)."""
-        from src.downloader.download import Downloader  # noqa: PLC0415
-        from src.downloader.factory import DownloaderFactory  # noqa: PLC0415
+        from .downloader.download import Downloader  # noqa: PLC0415
+        from .downloader.factory import DownloaderFactory  # noqa: PLC0415
+        from .utils import get_fallback_sources_for_app, validate_download_source  # noqa: PLC0415
 
         if self.download_dl:
             logger.info("Downloading apk to be patched using provided dl")
@@ -89,16 +90,27 @@ class APP(object):
 
             # Determine the list of sources to try (fallback mechanism)
             if not self.download_sources:
-                # If no sources provided, try to get from apk_sources
-                try:
-                    default_source = apk_sources[self.app_name.lower()].format(self.package_name)
-                    self.download_sources = [default_source]
-                except KeyError as key:
+                # If no sources provided, get fallback sources for this app
+                fallback_sources = get_fallback_sources_for_app(self.app_name)
+
+                if fallback_sources:
+                    # Validate and filter sources
+                    validated_sources = [source for source in fallback_sources if validate_download_source(source)]
+
+                    if validated_sources:
+                        self.download_sources = validated_sources
+                        logger.info(f"Using {len(validated_sources)} validated fallback sources for {self.app_name}: {validated_sources}")
+                    else:
+                        msg = f"No valid download sources found for {self.app_name}. Available fallbacks were: {fallback_sources}"
+                        raise DownloadError(msg)
+                else:
                     msg = f"App {self.app_name} not supported officially yet. Please provide download source in env."
-                    raise DownloadError(msg) from key
+                    raise DownloadError(msg)
 
             # Try each source in sequence until one succeeds
             last_exception = None
+            successful_source = None
+
             for idx, source in enumerate(self.download_sources):
                 logger.info(f"Trying download source {idx + 1}/{len(self.download_sources)}: {source}")
 
@@ -109,7 +121,8 @@ class APP(object):
                 if temp_cache_key in download_cache:
                     logger.info(f"Skipping download. Using cached APK from source {source} for {self.app_name} ({self.app_version})")
                     self.download_file_name, self.download_dl = download_cache[temp_cache_key]
-                    return
+                    successful_source = source
+                    break
 
                 try:
                     # Thread-safe cache check and download for this source
@@ -118,29 +131,42 @@ class APP(object):
                         if temp_cache_key in download_cache:
                             logger.info(f"Skipping download. Using cached APK from source {source} for {self.app_name} ({self.app_version})")
                             self.download_file_name, self.download_dl = download_cache[temp_cache_key]
-                            return
+                            successful_source = source
+                            break
 
                         logger.info(f"Cache miss for {self.app_name} ({self.app_version}) from source {source}. Proceeding with download.")
                         # Set download_source to current source before calling downloader
                         self.download_source = source
                         downloader = DownloaderFactory.create_downloader(config=config, apk_source=source)
-                        self.download_file_name, self.download_dl = downloader.download(self.app_version, self)
+
+                        # Attempt download with this source
+                        result = downloader.download(self.app_version, self)
+                        self.download_file_name, self.download_dl = result
 
                         # Save to cache using the source-specific cache key
                         download_cache[temp_cache_key] = (self.download_file_name, self.download_dl)
                         logger.info(f"Added {self.app_name} ({self.app_version}) from source {source} to download cache.")
-                        return  # Success, exit the loop
+                        successful_source = source
+                        break  # Success, exit the loop
 
                 except Exception as e:
                     logger.warning(f"Download from source {source} failed: {e!s}")
                     last_exception = e
-                    continue  # Try the next source
+                    # Continue to next source in the fallback list
 
-            # If we get here, all sources failed
-            if last_exception:
-                raise last_exception
-            msg = f"All download sources failed for {self.app_name}"
-            raise DownloadError(msg)
+                    # If this is the last source in the list, log all attempts
+                    if idx == len(self.download_sources) - 1:
+                        logger.error(f"All {len(self.download_sources)} sources failed for {self.app_name}. Attempts were: {self.download_sources}")
+                        logger.error(f"Last error was: {e!s}")
+
+            # If no source was successful, raise an error
+            if successful_source is None:
+                if last_exception:
+                    raise last_exception
+                msg = f"All download sources failed for {self.app_name}"
+                raise DownloadError(msg)
+
+            logger.info(f"Successfully downloaded {self.app_name} from source: {successful_source}")
 
     def get_download_cache_key(self: Self) -> tuple[str, str]:
         """Generate a unique cache key for APK downloads.
@@ -175,8 +201,8 @@ class APP(object):
         current_date = datetime.now(ZoneInfo(time_zone))
         formatted_date = current_date.strftime("%Y%b%d.%I%M%p").upper()
         return (
-            f"Re{self.app_name}-Version{slugify(self.app_version)}"
-            f"-PatchVersion{slugify(self.patch_bundles[0]["version"])}-{formatted_date}-output.apk"
+            f"Re{self.app_name}-Version{slugify(self.app_version or 'latest')}"
+            f"-PatchVersion{slugify(self.patch_bundles[0]['version'])}-{formatted_date}-output.apk"
         )
 
     def get_patch_bundles_versions(self: Self) -> list[str]:
@@ -217,12 +243,12 @@ class APP(object):
         -------
             tuple of strings, which is the tag,file name of the downloaded file.
         """
-        from src.downloader.download import Downloader  # noqa: PLC0415
+        from .downloader.download import Downloader  # noqa: PLC0415
 
         url = url.strip()
         tag = "latest"
         if url.startswith("https://github"):
-            from src.downloader.github import Github  # noqa: PLC0415
+            from .downloader.github import Github  # noqa: PLC0415
 
             tag, url = Github.patch_resource(url, assets_filter, config)
             if tag.startswith("tags/"):

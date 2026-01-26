@@ -19,10 +19,10 @@ from loguru import logger
 from requests import Response, Session
 
 if TYPE_CHECKING:
-    from src.app import APP
+    from .app import APP
 
-from src.downloader.sources import APK_MIRROR_APK_CHECK
-from src.exceptions import ScrapingError
+from .downloader.sources import APK_MIRROR_APK_CHECK
+from .exceptions import ScrapingError
 
 default_build = [
     "youtube",
@@ -57,6 +57,53 @@ resource_folder = "apks"
 branch_name = "changelogs"
 app_dump_key = "app_dump"
 patches_dl_list_key = "patches_dl_list"
+
+
+def get_fallback_sources_for_app(app_name: str) -> list[str]:
+    """Get fallback sources for an app in priority order.
+
+    Args:
+        app_name: Name of the app
+
+    Returns:
+        List of download sources in priority order
+    """
+    from .downloader import sources
+    apk_sources = sources.apk_sources
+    apk_fallback_sources = sources.apk_fallback_sources
+
+    # First check if app has specific fallback sources defined
+    if app_name.lower() in apk_fallback_sources:
+        fallback_sources_str = apk_fallback_sources[app_name.lower()]
+        return [source.strip() for source in fallback_sources_str.split(",") if source.strip()]
+
+    # If not, try to get from primary sources
+    if app_name.lower() in apk_sources:
+        return [apk_sources[app_name.lower()]]
+
+    # If app is not in either, return empty list
+    return []
+
+
+def validate_download_source(source: str) -> bool:
+    """Validate if a download source is properly formatted.
+
+    Args:
+        source: Download source URL
+
+    Returns:
+        True if source is valid, False otherwise
+    """
+    # Check if it's a valid URL format
+    if source.startswith(('http://', 'https://')):
+        return True
+    # Check if it's a special source like apkeep
+    elif source == 'apkeep':
+        return True
+    # Check if it's a local file reference
+    elif source.startswith('local://'):
+        return True
+    return False
 
 
 def update_changelog(name: str, response: dict[str, str]) -> None:

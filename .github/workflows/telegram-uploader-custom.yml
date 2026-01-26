@@ -4,28 +4,28 @@ on:
   workflow_dispatch:
     inputs:
       API_ID:
-        description: 'Telegram API ID'
+        description: "Telegram API ID"
         required: true
         type: number
       API_HASH:
-        description: 'Telegram API HASH'
+        description: "Telegram API HASH"
         required: true
         type: string
       BOT_TOKEN:
-        description: 'Bot Token(Sender)'
+        description: "Bot Token(Sender)"
         required: true
         type: string
       CHAT_ID:
-        description: 'Chat ID(Receiver)'
+        description: "Chat ID(Receiver)"
         required: true
         type: number
       STICKER_ID:
-        description: 'Sticker to Send'
+        description: "Sticker to Send"
         required: false
-        default: 'CAACAgUAAxkBAAEY3d5jRDs4sojYzahDxU7wvl7_e1yRhwACuAYAApqD2VV9UCzjLNawRCoE'
+        default: "CAACAgUAAxkBAAEY3d5jRDs4sojYzahDxU7wvl7_e1yRhwACuAYAApqD2VV9UCzjLNawRCoE"
         type: string
       CHANGELOG_GITHUB_REPOSITORY:
-        description: 'Repo to Fetch Changelog'
+        description: "Repo to Fetch Changelog"
         required: false
         type: string
 

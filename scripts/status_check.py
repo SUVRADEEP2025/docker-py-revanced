@@ -82,6 +82,8 @@ def apkmonk_scrapper(package_name: str) -> str:
         href_elements = parsed_head.find_all(href=True)
         possible_link = []
         for element in href_elements:
+            if not isinstance(element, Tag):
+                continue
             href_value = element.get("href")
             if href_value.startswith(icon_logo):
                 possible_link.append(href_value)
@@ -139,6 +141,8 @@ def apkpure_scrapper(package_name: str) -> str:
         soup = BeautifulSoup(r.text, bs4_parser)
         search_result = soup.find_all(class_="brand-info-top")
         for brand_info in search_result:
+            if not isinstance(brand_info, Tag):
+                continue
             if icon_element := brand_info.find(class_="icon"):
                 return str(icon_element.get("src"))
         raise APKPureIconScrapError(url=apkpure_url)

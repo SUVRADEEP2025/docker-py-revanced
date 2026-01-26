@@ -1,15 +1,15 @@
 """Downloader Factory."""
 
 from bs4 import Script
-from src.config import RevancedConfig
-from src.downloader.apkeep import Apkeep
-from src.downloader.apkmirror import ApkMirror
-from src.downloader.apkmonk import ApkMonk
-from src.downloader.apkpure import ApkPure
-from src.downloader.apksos import ApkSos
-from src.downloader.download import Downloader
-from src.downloader.github import Github
-from src.downloader.sources import (
+from ..config import RevancedConfig
+from .apkeep import Apkeep
+from .apkmirror import ApkMirror
+from .apkmonk import ApkMonk
+from .apkpure import ApkPure
+from .apksos import ApkSos
+from .download import Downloader
+from .github import Github
+from .sources import (
     APK_MIRROR_BASE_APK_URL,
     APK_MIRROR_BASE_URL,
     APK_MONK_BASE_URL,
@@ -19,8 +19,8 @@ from src.downloader.sources import (
     GITHUB_BASE_URL,
     UPTODOWN_SUFFIX,
 )
-from src.downloader.uptodown import UptoDown
-from src.exceptions import DownloadError
+from .uptodown import UptoDown
+from ..exceptions import DownloadError
 import os
 
 
@@ -261,9 +261,7 @@ class DownloaderFactory(object):
                         "bash", apkmd_path, org, repo
                         ], check=False, capture_output=True, text=True)
                     except Exception:
-                        result = run([
-                        "bash", apkcd_path, package
-                        ], check=False, capture_output=True, text=True)
+                        result = run(["bash", apkcd_path, package], check=False, capture_output=True, text=True)
                     return ApkMirror(config)
             except Exception:
                 if apk_source in appMap and 'org' in appMap[apk_source] and 'repo' in appMap[apk_source]:
