@@ -12,7 +12,7 @@ from zoneinfo import ZoneInfo
 from loguru import logger
 
 from src.config import RevancedConfig
-from src.downloader.sources import APKEEP, apk_sources
+from src.downloader.sources import APKEEP, apk_fallback_sources, apk_sources
 from src.exceptions import BuilderError, DownloadError, PatchingFailedError
 from src.utils import slugify, time_zone
 
@@ -56,9 +56,12 @@ class APP(object):
         else:
             # Check if there are predefined fallback sources for this app
             from src.downloader.sources import apk_fallback_sources
+
             fallback_key = app_name.lower()
             if fallback_key in apk_fallback_sources:
-                self.download_sources = [source.strip() for source in apk_fallback_sources[fallback_key].split(",") if source.strip()]
+                self.download_sources = [
+                    source.strip() for source in apk_fallback_sources[fallback_key].split(",") if source.strip()
+                ]
             else:
                 self.download_sources = []  # Initialize download_sources
         self.package_name = package_name
@@ -89,13 +92,27 @@ class APP(object):
 
             # Determine the list of sources to try (fallback mechanism)
             if not self.download_sources:
+                app_key = self.app_name.lower()
+                # Check if we have defined fallbacks for this app
+                if app_key in apk_fallback_sources:
+                    self.download_sources = [
+                        s.strip().format(self.package_name) for s in apk_fallback_sources[app_key].split(",")
+                    ]
                 # If no sources provided, try to get from apk_sources
-                try:
-                    default_source = apk_sources[self.app_name.lower()].format(self.package_name)
+                elif app_key in apk_sources:
+                    default_source = apk_sources[app_key].format(self.package_name)
                     self.download_sources = [default_source]
-                except KeyError as key:
+
+                    # Add generic fallbacks if available
+                    if "default_fallback" in apk_fallback_sources:
+                        generic_fallbacks = [
+                            s.strip().format(self.package_name)
+                            for s in apk_fallback_sources["default_fallback"].split(",")
+                        ]
+                        self.download_sources.extend(generic_fallbacks)
+                else:
                     msg = f"App {self.app_name} not supported officially yet. Please provide download source in env."
-                    raise DownloadError(msg) from key
+                    raise DownloadError(msg)
 
             # Try each source in sequence until one succeeds
             last_exception = None
@@ -107,7 +124,9 @@ class APP(object):
 
                 # Check if this specific source/version combination is already cached
                 if temp_cache_key in download_cache:
-                    logger.info(f"Skipping download. Using cached APK from source {source} for {self.app_name} ({self.app_version})")
+                    logger.info(
+                        f"Skipping download. Using cached APK from source {source} for {self.app_name} ({self.app_version})"
+                    )
                     self.download_file_name, self.download_dl = download_cache[temp_cache_key]
                     return
 
@@ -116,11 +135,15 @@ class APP(object):
                     with download_lock:
                         # Double-check after acquiring lock to handle race conditions
                         if temp_cache_key in download_cache:
-                            logger.info(f"Skipping download. Using cached APK from source {source} for {self.app_name} ({self.app_version})")
+                            logger.info(
+                                f"Skipping download. Using cached APK from source {source} for {self.app_name} ({self.app_version})"
+                            )
                             self.download_file_name, self.download_dl = download_cache[temp_cache_key]
                             return
 
-                        logger.info(f"Cache miss for {self.app_name} ({self.app_version}) from source {source}. Proceeding with download.")
+                        logger.info(
+                            f"Cache miss for {self.app_name} ({self.app_version}) from source {source}. Proceeding with download."
+                        )
                         # Set download_source to current source before calling downloader
                         self.download_source = source
                         downloader = DownloaderFactory.create_downloader(config=config, apk_source=source)
@@ -128,7 +151,9 @@ class APP(object):
 
                         # Save to cache using the source-specific cache key
                         download_cache[temp_cache_key] = (self.download_file_name, self.download_dl)
-                        logger.info(f"Added {self.app_name} ({self.app_version}) from source {source} to download cache.")
+                        logger.info(
+                            f"Added {self.app_name} ({self.app_version}) from source {source} to download cache."
+                        )
                         return  # Success, exit the loop
 
                 except Exception as e:
@@ -176,7 +201,7 @@ class APP(object):
         formatted_date = current_date.strftime("%Y%b%d.%I%M%p").upper()
         return (
             f"Re{self.app_name}-Version{slugify(self.app_version)}"
-            f"-PatchVersion{slugify(self.patch_bundles[0]["version"])}-{formatted_date}-output.apk"
+            f"-PatchVersion{slugify(self.patch_bundles[0]['version'])}-{formatted_date}-output.apk"
         )
 
     def get_patch_bundles_versions(self: Self) -> list[str]:
