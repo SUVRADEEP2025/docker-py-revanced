@@ -5,7 +5,7 @@ from typing import Self
 from loguru import logger
 from packaging.version import InvalidVersion, Version
 
-from ..app import APP
+from src.app import APP
 
 
 class ReleaseManager(object):

@@ -5,10 +5,10 @@ from typing import Any, ClassVar, Self
 
 from loguru import logger
 
-from .app import APP
-from .config import RevancedConfig
-from .exceptions import AppNotFoundError
-from .patches_gen import convert_command_output_to_json
+from src.app import APP
+from src.config import RevancedConfig
+from src.exceptions import AppNotFoundError
+from src.patches_gen import convert_command_output_to_json
 
 
 class Patches(object):

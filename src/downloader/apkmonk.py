@@ -4,14 +4,14 @@ import re
 from typing import Any, Self
 
 import requests
-from bs4 import BeautifulSoup, Tag
+from bs4 import BeautifulSoup
 
 from scripts.status_check import combo_headers
-from ..app import APP
-from .download import Downloader
-from .sources import APK_MONK_BASE_URL
-from ..exceptions import APKMonkAPKDownloadError
-from ..utils import bs4_parser, handle_request_response, request_header, request_timeout
+from src.app import APP
+from src.downloader.download import Downloader
+from src.downloader.sources import APK_MONK_BASE_URL
+from src.exceptions import APKMonkAPKDownloadError
+from src.utils import bs4_parser, handle_request_response, request_header, request_timeout
 
 
 class ApkMonk(Downloader):
@@ -57,16 +57,11 @@ class ApkMonk(Downloader):
         :param main_page: Version of the application to download
         :return: Version of downloaded apk
         """
-        if not app.download_source:
-            raise APKMonkAPKDownloadError("Download source is missing", url="")
-
         r = requests.get(app.download_source, headers=request_header, allow_redirects=True, timeout=request_timeout)
         handle_request_response(r, app.download_source)
         soup = BeautifulSoup(r.text, bs4_parser)
         version_table = soup.find_all(class_="striped")
         for version_row in version_table:
-            if not isinstance(version_row, Tag):
-                continue
             version_links = version_row.find_all("a")
             for link in version_links:
                 app_version = link.text
@@ -85,9 +80,6 @@ class ApkMonk(Downloader):
         :param app: Name of the application
         :return: Version of downloaded apk
         """
-        if not app.download_source:
-            raise APKMonkAPKDownloadError("Download source is missing", url="")
-
         r = requests.get(app.download_source, headers=request_header, allow_redirects=True, timeout=request_timeout)
         handle_request_response(r, app.download_source)
         soup = BeautifulSoup(r.text, bs4_parser)

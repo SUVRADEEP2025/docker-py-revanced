@@ -5,10 +5,10 @@ from typing import Any, Self
 import requests
 from bs4 import BeautifulSoup
 
-from ..app import APP
-from .download import Downloader
-from ..exceptions import APKSosAPKDownloadError
-from ..utils import bs4_parser, handle_request_response, request_header, request_timeout
+from src.app import APP
+from src.downloader.download import Downloader
+from src.exceptions import APKSosAPKDownloadError
+from src.utils import bs4_parser, handle_request_response, request_header, request_timeout
 
 
 class ApkSos(Downloader):
@@ -41,6 +41,4 @@ class ApkSos(Downloader):
         :param app: Name of the application
         :return: Version of downloaded apk
         """
-        if not app.download_source:
-            raise APKSosAPKDownloadError("Download source is missing", url="")
         return self.extract_download_link(app.download_source, app.app_name)

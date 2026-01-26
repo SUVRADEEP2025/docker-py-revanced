@@ -7,9 +7,9 @@ from typing import Any, Self
 
 from loguru import logger
 
-from ..app import APP
-from .download import Downloader
-from ..exceptions import DownloadError
+from src.app import APP
+from src.downloader.download import Downloader
+from src.exceptions import DownloadError
 
 
 class Apkeep(Downloader):

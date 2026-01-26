@@ -38,7 +38,7 @@ on:
         default: true
       DEBUG_ENABLED:
         type: boolean
-        description: "Run the build with tmate debugging enabled."
+        description: 'Run the build with tmate debugging enabled.'
         required: false
         default: false
       PREFERRED_PATCH_APPS:
@@ -79,7 +79,7 @@ on:
         default: true
       DEBUG_ENABLED:
         type: boolean
-        description: "Run the build with tmate debugging enabled."
+        description: 'Run the build with tmate debugging enabled.'
         required: false
         default: false
       PREFERRED_PATCH_APPS:
@@ -134,7 +134,7 @@ jobs:
           artifactErrorsFailBuild: true
 
   upload-to-telegram:
-    needs: [upload-to-github]
+    needs: [ upload-to-github ]
     uses: nikhilbadyal/ghactions/.github/workflows/telegram-uploader.yml@main
     if: inputs.TELEGRAM_NO_ROOT_UPLOAD
     secrets:
@@ -146,7 +146,7 @@ jobs:
       MESSAGE: ${{ secrets.MESSAGE_NON_ROOT }}
 
   upload-to-telegram-root:
-    needs: [upload-to-telegram]
+    needs: [ upload-to-telegram ]
     uses: nikhilbadyal/ghactions/.github/workflows/telegram-uploader.yml@main
     if: inputs.TELEGRAM_ROOT_UPLOAD
     secrets:
@@ -179,21 +179,23 @@ jobs:
           done
           apk_list=${apk_list:1}
           echo "apks=$apk_list" >> "$GITHUB_OUTPUT"
+          is_present=$([ -n "${{ secrets.APPRISE_URL }}" ] && echo true || echo false );
+          echo "has_apprise_url=$is_present"  >> $GITHUB_OUTPUT
       - name: Print files
         run: echo "${{ steps.ff.outputs.apks }} ${{ steps.ff.outputs.has_apprise_url }}"
 
-      - name: Upload notification
-        uses: niniyas/ntfy-action@master
+      - name: Upload to Telegram
+        uses: nikhilbadyal/ghaction-apprise@main
         with:
-          url: ${{ secrets.NTFY_URL }}
-          topic: ${{ secrets.NTFY_TOPIC }}
-          title: New Version Update
-          details: New Updated Version for apks have been uploaded
+          APPRISE_URL: ${{ secrets.APPRISE_URL }}
+          APPRISE_NOTIFICATION_BODY: ${{ secrets.APPRISE_NOTIFICATION_BODY }}
+          APPRISE_NOTIFICATION_TITLE: ${{ secrets.APPRISE_NOTIFICATION_TITLE }}
+          APPRISE_ATTACHMENTS: ${{ steps.ff.outputs.apks }}
 
   cleanup:
     name: GitHub Cleanup
     if: inputs.CLEANUP
-    needs: [upload-to-telegram]
+    needs: [ upload-to-telegram ]
     uses: ./.github/workflows/github-cleanup.yml
     secrets:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

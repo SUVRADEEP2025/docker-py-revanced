@@ -6,10 +6,10 @@ import requests
 from bs4 import BeautifulSoup, Tag
 from loguru import logger
 
-from ..app import APP
-from .download import Downloader
-from ..exceptions import UptoDownAPKDownloadError
-from ..utils import bs4_parser, handle_request_response, request_header, request_timeout
+from src.app import APP
+from src.downloader.download import Downloader
+from src.exceptions import UptoDownAPKDownloadError
+from src.utils import bs4_parser, handle_request_response, request_header, request_timeout
 
 
 class UptoDown(Downloader):

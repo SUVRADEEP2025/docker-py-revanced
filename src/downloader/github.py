@@ -8,11 +8,11 @@ import requests
 from lastversion import latest
 from loguru import logger
 
-from ..app import APP
-from ..config import RevancedConfig
-from .download import Downloader
-from ..exceptions import DownloadError
-from ..utils import handle_request_response, request_timeout, update_changelog
+from src.app import APP
+from src.config import RevancedConfig
+from src.downloader.download import Downloader
+from src.exceptions import DownloadError
+from src.utils import handle_request_response, request_timeout, update_changelog
 
 
 class Github(Downloader):

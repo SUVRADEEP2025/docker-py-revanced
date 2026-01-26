@@ -5,7 +5,7 @@ from typing import Self
 
 from environs import Env
 
-from .utils import default_build, default_cli, default_patches, resource_folder
+from src.utils import default_build, default_cli, default_patches, resource_folder
 
 
 class RevancedConfig(object):

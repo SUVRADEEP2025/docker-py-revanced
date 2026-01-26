@@ -2,23 +2,18 @@
 
 import os
 import subprocess
-import time
-from http.client import OK as HTTP_OK
-from http.client import PARTIAL_CONTENT as HTTP_PARTIAL_CONTENT
-from http.client import REQUESTED_RANGE_NOT_SATISFIABLE as HTTP_RANGE_NOT_SATISFIABLE
 from pathlib import Path
 from queue import PriorityQueue
 from time import perf_counter
 from typing import Any, Self
 
-import requests
 from loguru import logger
 from tqdm import tqdm
 
-from ..app import APP
-from ..config import RevancedConfig
-from ..exceptions import DownloadError
-from ..utils import handle_request_response, implement_method, request_timeout, session
+from src.app import APP
+from src.config import RevancedConfig
+from src.exceptions import DownloadError
+from src.utils import handle_request_response, implement_method, session
 
 
 class Downloader(object):
@@ -36,13 +31,9 @@ class Downloader(object):
         if not url:
             msg = "No url provided to download"
             raise DownloadError(msg)
-
-        file_path = self.config.temp_folder.joinpath(file_name)
-
-        if self.config.dry_run:
-            logger.debug(f"Skipping download of {file_name} from {url}. Dry running.")
+        if self.config.dry_run or self.config.temp_folder.joinpath(file_name).exists():
+            logger.debug(f"Skipping download of {file_name} from {url}. File already exists or dry running.")
             return
-
         logger.info(f"Trying to download {file_name} from {url}")
         self._QUEUE_LENGTH += 1
         start = perf_counter()
@@ -50,92 +41,27 @@ class Downloader(object):
         if self.config.personal_access_token and "github" in url:
             logger.debug("Using personal access token")
             headers["Authorization"] = f"token {self.config.personal_access_token}"
-
-    def _download_loop(self, url: str, file_path: Path, file_name: str, headers: dict) -> None:
-        max_retries = 5
-        retry_count = 0
-
-        while retry_count < max_retries:
-            try:
-                if self._perform_download(url, file_path, file_name, headers):
-                    return
-            except (requests.exceptions.RequestException, OSError) as e:
-                retry_count += 1
-                logger.warning(f"Error downloading {file_name}: {e}. Retry {retry_count}/{max_retries}")
-                time.sleep(2)
-
-        msg = f"Failed to download {file_name} after {max_retries} attempts"
-        raise DownloadError(msg)
-
-    def _perform_download(self, url: str, file_path: Path, file_name: str, headers: dict) -> bool:
-        resume_headers = headers.copy()
-        downloaded_bytes = 0
-        mode = "wb"
-
-        if file_path.exists():
-            downloaded_bytes = file_path.stat().st_size
-            resume_headers["Range"] = f"bytes={downloaded_bytes}-"
-            mode = "ab"
-
-        response = session.get(url, stream=True, headers=resume_headers, timeout=request_timeout)
-
-        if response.status_code == HTTP_RANGE_NOT_SATISFIABLE:
-            content_range = response.headers.get("content-range", "")
-            if "/" in content_range:
-                remote_size = int(content_range.split("/")[1])
-                if downloaded_bytes == remote_size:
-                    logger.debug(f"File {file_name} already fully downloaded.")
-                    return True
-
-            logger.warning(f"File {file_name} size mismatch. Restarting download.")
-            mode = "wb"
-            downloaded_bytes = 0
-            response = session.get(url, stream=True, headers=headers, timeout=request_timeout)
-
-        if response.status_code == HTTP_PARTIAL_CONTENT:
-            content_range = response.headers.get("content-range", "")
-            if "/" in content_range:
-                total_size = int(content_range.split("/")[1])
-            else:
-                total_size = downloaded_bytes + int(response.headers.get("content-length", 0))
-            logger.debug(f"Resuming download of {file_name} from {downloaded_bytes} bytes")
-
-        elif response.status_code == HTTP_OK:
-            total_size = int(response.headers.get("content-length", 0))
-            if downloaded_bytes > 0:
-                logger.debug("Server does not support resume. Restarting download.")
-            mode = "wb"
-            downloaded_bytes = 0
-
-        else:
-            handle_request_response(response, url)
-            total_size = 0  # Should be unreachable if handle_request_response raises
-
-        self._write_file(response, file_path, mode, total_size, downloaded_bytes)
-        return True
-
-    def _write_file(
-        self,
-        response: requests.Response,
-        file_path: Path,
-        mode: str,
-        total_size: int,
-        initial_bytes: int,
-    ) -> None:
-        with file_path.open(mode) as dl_file:
-            with tqdm(
-                desc=file_path.name,
-                total=total_size,
-                initial=initial_bytes,
-                unit="iB",
-                unit_scale=True,
-                unit_divisor=1024,
-                colour="green",
-            ) as bar:
-                for chunk in response.iter_content(self._CHUNK_SIZE):
-                    if chunk:
-                        size = dl_file.write(chunk)
-                        bar.update(size)
+        response = session.get(
+            url,
+            stream=True,
+            headers=headers,
+        )
+        handle_request_response(response, url)
+        total = int(response.headers.get("content-length", 0))
+        bar = tqdm(
+            desc=file_name,
+            total=total,
+            unit="iB",
+            unit_scale=True,
+            unit_divisor=1024,
+            colour="green",
+        )
+        with self.config.temp_folder.joinpath(file_name).open("wb") as dl_file, bar:
+            for chunk in response.iter_content(self._CHUNK_SIZE):
+                size = dl_file.write(chunk)
+                bar.update(size)
+        self._QUEUE.put((perf_counter() - start, file_name))
+        logger.debug(f"Downloaded {file_name}")
 
     def extract_download_link(self: Self, page: str, app: str) -> tuple[str, str]:
         """Extract download link from web page."""
@@ -188,7 +114,7 @@ class Downloader(object):
         base_name, _ = os.path.splitext(filename)
         return base_name + new_extension
 
-    def download(self: Self, version: str | None, app: APP, **kwargs: Any) -> tuple[str, str]:
+    def download(self: Self, version: str, app: APP, **kwargs: Any) -> tuple[str, str]:
         """Public function to download apk to patch.
 
         :param version: version to download

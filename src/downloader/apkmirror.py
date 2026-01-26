@@ -6,11 +6,11 @@ import requests
 from bs4 import BeautifulSoup, Tag
 from loguru import logger
 
-from ..app import APP
-from .download import Downloader
-from .sources import APK_MIRROR_BASE_URL
-from ..exceptions import APKMirrorAPKDownloadError, ScrapingError
-from ..utils import bs4_parser, contains_any_word, handle_request_response, request_header, request_timeout, slugify
+from src.app import APP
+from src.downloader.download import Downloader
+from src.downloader.sources import APK_MIRROR_BASE_URL
+from src.exceptions import APKMirrorAPKDownloadError, ScrapingError
+from src.utils import bs4_parser, contains_any_word, handle_request_response, request_header, request_timeout, slugify
 
 
 class ApkMirror(Downloader):
@@ -24,14 +24,10 @@ class ApkMirror(Downloader):
         extension = "zip" if apk_type == "BUNDLE" else "apk"
         possible_links = notes_divs.find_all("a")
         for possible_link in possible_links:
-            if not isinstance(possible_link, Tag):
-                continue
-            href = possible_link.get("href")
-            if href and "download.php?id=" in href:
+            if possible_link.get("href") and "download.php?id=" in possible_link.get("href"):
                 file_name = f"{app}.{extension}"
-                download_url = APK_MIRROR_BASE_URL + str(possible_link["href"])
-                self._download(download_url, file_name)
-                return file_name, download_url
+                self._download(APK_MIRROR_BASE_URL + possible_link["href"], file_name)
+                return file_name, APK_MIRROR_BASE_URL + possible_link["href"]
         msg = f"Unable to extract force download for {app}"
         raise APKMirrorAPKDownloadError(msg, url=link)
 
@@ -44,16 +40,14 @@ class ApkMirror(Downloader):
         logger.debug(f"Extracting download link from\n{page}")
         download_button = self._extracted_search_div(page, "center")
         download_links = download_button.find_all("a")
-        final_download_link = None
-        for download_link in download_links:
-            if not isinstance(download_link, Tag):
-                continue
-            href = download_link.get("href")
-            if href and "download/?key=" in href:
-                final_download_link = str(download_link["href"])
-                break
-
-        if final_download_link:
+        if final_download_link := next(
+            (
+                download_link["href"]
+                for download_link in download_links
+                if download_link.get("href") and "download/?key=" in download_link.get("href")
+            ),
+            None,
+        ):
             return self._extract_force_download_link(APK_MIRROR_BASE_URL + final_download_link, app)
         msg = f"Unable to extract link from {app} version list"
         raise APKMirrorAPKDownloadError(msg, url=page)
@@ -69,17 +63,9 @@ class ApkMirror(Downloader):
         links: dict[str, str] = {}
         apk_archs = ["arm64-v8a", "universal", "noarch"]
         for row in table_rows:
-            if not isinstance(row, Tag):
-                continue
-            accent_color_elem = row.find(class_="accent_color")
-            if accent_color_elem:
-                if not isinstance(accent_color_elem, Tag):
-                    continue
-                apkm_badge_elem = row.find(class_="apkm-badge")
-                if not isinstance(apkm_badge_elem, Tag):
-                    continue
-                apk_type = apkm_badge_elem.get_text()
-                sub_url = str(accent_color_elem["href"])
+            if row.find(class_="accent_color"):
+                apk_type = row.find(class_="apkm-badge").get_text()
+                sub_url = row.find(class_="accent_color")["href"]
                 text = row.text.strip()
                 if apk_type == "APK" and (not contains_any_word(text, apk_archs)):
                     continue
@@ -146,18 +132,10 @@ class ApkMirror(Downloader):
             raise APKMirrorAPKDownloadError(msg, url="")
         versions_div = self._extracted_search_div(app_main_page, "listWidget p-relative")
         app_rows = versions_div.find_all(class_="appRow")
-        version_urls = []
-        for app_row in app_rows:
-            if not isinstance(app_row, Tag):
-                continue
-            app_row_title = app_row.find(class_="appRowTitle")
-            if not isinstance(app_row_title, Tag):
-                continue
-            title_text = app_row_title.get_text().lower()
-            if "beta" in title_text or "alpha" in title_text:
-                continue
-            download_link = app_row.find(class_="downloadLink")
-            if not isinstance(download_link, Tag):
-                continue
-            version_urls.append(str(download_link["href"]))
+        version_urls = [
+            app_row.find(class_="downloadLink")["href"]
+            for app_row in app_rows
+            if "beta" not in app_row.find(class_="appRowTitle").get_text().lower()
+            and "alpha" not in app_row.find(class_="appRowTitle").get_text().lower()
+        ]
         return self.specific_version(app, "latest", APK_MIRROR_BASE_URL + max(version_urls))

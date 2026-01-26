@@ -104,52 +104,13 @@ apk_sources = {
 # Define fallback sources for apps - each entry is a comma-separated list of sources in priority order
 apk_fallback_sources = {
     # For YouTube, try multiple sources in order
-    "youtube": f"{APK_MIRROR_BASE_APK_URL}/google-inc/youtube/,youtube.en.uptodown.com/android,{APK_PURE_URL.format('com.google.android.youtube')},https://github.com/revanced/revanced-integrations/releases/latest",
+    "youtube": f"{APK_MIRROR_BASE_APK_URL}/google-inc/youtube/,https://github.com/revanced/revanced-integrations/releases/latest,youtube.en.uptodown.com/android",
 
     # For YouTube Music
-    "youtube_music": f"{APK_MIRROR_BASE_APK_URL}/google-inc/youtube-music/,youtube-music.en.uptodown.com/android,{APK_PURE_URL.format('com.google.android.apps.youtube.music')}",
+    "youtube_music": f"{APK_MIRROR_BASE_APK_URL}/google-inc/youtube-music/,https://music.youtube.com,youtube-music.en.uptodown.com/android",
 
-    # For Reddit
-    "reddit": f"{APK_MIRROR_BASE_APK_URL}/redditinc/reddit/,reddit.en.uptodown.com/android,{APK_PURE_URL.format('com.reddit.frontpage')},https://github.com/revanced/revanced-patches/releases/latest",
-
-    # For Twitter/X
-    "twitter": f"{APK_MIRROR_BASE_APK_URL}/x-corp/twitter/,twitter.en.uptodown.com/android,{APK_PURE_URL.format('com.twitter.android')}",
-
-    # For TikTok
-    "tiktok": f"{APK_MIRROR_BASE_APK_URL}/tiktok-pte-ltd/tik-tok-including-musical-ly/,tiktok.en.uptodown.com/android,{APK_PURE_URL.format('com.ss.android.ugc.trill')}",
-
-    # For Spotify
-    "spotify": f"{APK_MIRROR_BASE_APK_URL}/spotify-ab/spotify-music-podcasts/,spotify.en.uptodown.com/android,{APK_PURE_URL.format('com.spotify.music')}",
-
-    # For Instagram
-    "instagram": f"{APK_MIRROR_BASE_APK_URL}/instagram/instagram-instagram/,instagram.en.uptodown.com/android,{APK_PURE_URL.format('com.instagram.android')}",
-
-    # For Messenger
-    "messenger": f"{APK_MIRROR_BASE_APK_URL}/facebook-2/messenger/,messenger.en.uptodown.com/android,{APK_PURE_URL.format('com.facebook.orca')}",
-
-    # For Twitch
-    "twitch": f"{APK_MIRROR_BASE_APK_URL}/twitch-interactive-inc/twitch/,twitch.en.uptodown.com/android,{APK_PURE_URL.format('tv.twitch.android.app')}",
-
-    # For Duolingo
-    "duolingo": f"{APK_MIRROR_BASE_APK_URL}/duolingo/duolingo-duolingo/,duolingo.en.uptodown.com/android,{APK_PURE_URL.format('com.duolingo')}",
-
-    # For WarnWetter
-    "warnwetter": f"{APK_MIRROR_BASE_APK_URL}/deutscher-wetterdienst/warnwetter/,warnwetter.en.uptodown.com/android,{APK_PURE_URL.format('de.dwd.warnapp')}",
-
-    # For Pixiv
-    "pixiv": f"{APK_MIRROR_BASE_APK_URL}/pixiv-inc/pixiv/,pixiv.en.uptodown.com/android,{APK_PURE_URL.format('jp.pxv.android')}",
-
-    # For Strava
-    "strava": f"{APK_MIRROR_BASE_APK_URL}/strava-inc/strava-running-and-cycling-gps/,strava.en.uptodown.com/android,{APK_PURE_URL.format('com.strava')}",
-
-    # For Photomath
-    "photomath": f"{APK_MIRROR_BASE_APK_URL}/google-inc/photomath/,photomath.en.uptodown.com/android,{APK_PURE_URL.format('com.microblink.photomath')}",
-
-    # For Amazon Shopping
-    "amazon": f"{APK_MIRROR_BASE_APK_URL}/amazon-mobile-llc/amazon-shopping/,amazon.en.uptodown.com/android,{APK_PURE_URL.format('com.amazon.mShop.android.shopping')}",
-
-    # For Prime Video
-    "prime-video": f"{APK_MIRROR_BASE_APK_URL}/amazon-mobile-llc/amazon-prime-video/,primevideo.en.uptodown.com/android,{APK_PURE_URL.format('com.amazon.avod.thirdpartyclient')}",
+    # For other apps, you can define similar fallback chains
+    "reddit": f"{APK_MIRROR_BASE_APK_URL}/redditinc/reddit/,reddit.en.uptodown.com/android,https://github.com/revanced/revanced-patches/releases/latest",
 
     # Generic fallback for other apps
     "default_fallback": f"{APK_MIRROR_BASE_URL},{UPTODOWN_BASE_URL.format('default')},{APK_PURE_BASE_URL}",

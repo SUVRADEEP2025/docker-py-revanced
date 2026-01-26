@@ -45,6 +45,3 @@ warn_unused_configs = true
 line_length = 120
 skip = ["venv"]
 profile = "black"
-
-[tool.pyrefly]
-search-path = ["."]

@@ -7,11 +7,11 @@ from typing import Any, Self
 
 from loguru import logger
 
-from .app import APP
-from .config import RevancedConfig
-from .exceptions import PatchingFailedError
-from .patches import Patches
-from .utils import possible_archs
+from src.app import APP
+from src.config import RevancedConfig
+from src.exceptions import PatchingFailedError
+from src.patches import Patches
+from src.utils import possible_archs
 
 
 class Parser(object):
