@@ -21,11 +21,6 @@ on:
         required: false
         type: boolean
         default: false
-      APPRISE_NOTIFY:
-        description: "Use Apprise to Notify"
-        required: false
-        type: boolean
-        default: false
       CLEANUP:
         description: "Clear GitHub(Useful if Telegram upload is enabled)"
         required: false
@@ -59,11 +54,6 @@ on:
         default: true
       TELEGRAM_ROOT_UPLOAD:
         description: "Upload Magisk Module from nikhilbadyal/revanced-magisk-module to Telegram"
-        required: false
-        type: boolean
-        default: false
-      APPRISE_NOTIFY:
-        description: "Use Apprise to Notify"
         required: false
         type: boolean
         default: false
@@ -156,34 +146,13 @@ jobs:
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       DOWNLOAD_GITHUB_REPOSITORY: ${{ secrets.ROOT_DOWNLOAD_GITHUB_REPOSITORY }}
       MESSAGE: ${{ secrets.MESSAGE_ROOT }}
+      TELEGRAM_STICKER_ID: ${{ secrets.TELEGRAM_STICKER_ID }}
 
-  apprise-notifier:
-    needs: build-apk
-    name: Apprise Notifier
+  upload-notification:
+    name: Upload notification
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    if: inputs.APPRISE_NOTIFY
-
     steps:
-      - name: Download Already Built APKs
-        uses: actions/download-artifact@main
-        with:
-          name: Built-APKs
-
-      - name: Find all built apks
-        id: ff
-        run: |
-          apk_list=""
-          for filename in $(find . -name "*-output.apk" -type f); do
-            apk_list="$apk_list,$filename"
-          done
-          apk_list=${apk_list:1}
-          echo "apks=$apk_list" >> "$GITHUB_OUTPUT"
-      - name: Print files
-        run: echo "${{ steps.ff.outputs.apks }} ${{ steps.ff.outputs.has_apprise_url }}"
-
-      - name: Upload notification
-        uses: niniyas/ntfy-action@master
+      - uses: niniyas/ntfy-action@master
         with:
           url: ${{ secrets.NTFY_URL }}
           topic: ${{ secrets.NTFY_TOPIC }}
@@ -191,9 +160,6 @@ jobs:
           details: New Updated Version for apks have been uploaded
 
   cleanup:
-    name: GitHub Cleanup
-    if: inputs.CLEANUP
-    needs: [upload-to-telegram]
     uses: ./.github/workflows/github-cleanup.yml
     secrets:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
