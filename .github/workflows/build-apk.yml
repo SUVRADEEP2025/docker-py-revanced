@@ -133,10 +133,6 @@ jobs:
           tag: Build-${{ steps.get-date.outputs.date }}
           artifactErrorsFailBuild: true
 
-      - name: Sleep for 10 seconds
-        run: |
-          sleep 10
-
   upload-to-telegram:
     needs: [upload-to-github]
     uses: nikhilbadyal/ghactions/.github/workflows/telegram-uploader.yml@main

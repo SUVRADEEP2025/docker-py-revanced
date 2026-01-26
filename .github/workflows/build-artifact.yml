@@ -54,6 +54,7 @@ jobs:
 
       - name: Setup python
         uses: actions/setup-python@main
+        if: ${{ inputs.PREFERRED_PATCH_APPS }}
         with:
           python-version: '3.x'
 
@@ -102,12 +103,6 @@ jobs:
           fi
           echo "${updated_json}" > "${path}"
 
-
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@master
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.DEBUG_ENABLED }}
-        with:
-          detached: true
 
       - name: Build Revanced APKs
         if: ${{ true && !inputs.DEBUG_ENABLED }}
