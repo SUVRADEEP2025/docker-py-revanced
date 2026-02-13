@@ -25,3 +25,10 @@ runs:
         tag: all
         bodyFile: ${{ github.workspace }}-CHANGELOG.txt
         allowUpdates: true
+    - name: Notify release
+      uses: robiningelbrecht/ntfy-action@v1.0.0
+      if: Release != null
+      with:
+          url: ${{ secrets.NTFY_URL }}
+          topic: ${{ secrets.NTFY_TOPIC }}
+          job_status: ${{ job.status }}
