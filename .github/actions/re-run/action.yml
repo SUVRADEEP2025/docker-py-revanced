@@ -1,4 +1,5 @@
 name: Re-run workflow if github connection not stable
+description: "Re-runs the workflow if the GitHub connection is not stable"
 runs:
   using: "composite"
   steps:

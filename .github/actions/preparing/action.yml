@@ -1,4 +1,5 @@
 name: Preparing to patch
+description: "Prepares to patch by setting up the environment"
 runs:
   using: "composite"
   steps:
