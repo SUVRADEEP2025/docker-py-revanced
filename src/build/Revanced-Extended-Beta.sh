@@ -16,15 +16,15 @@ done
 # Patch Youtube Arm64-v8a
 get_patches_key "youtube-revanced-extended"
 patch "youtube-beta-arm64-v8a" "revanced-extended" "inotia"
-# Patch Youtube Armeabi-v7a
-get_patches_key "youtube-revanced-extended"
-patch "youtube-beta-armeabi-v7a" "revanced-extended" "inotia"
-# Patch Youtube x86
-get_patches_key "youtube-revanced-extended"
-patch "youtube-beta-x86" "revanced-extended" "inotia"
-# Patch Youtube x86_64
-get_patches_key "youtube-revanced-extended"
-patch "youtube-beta-x86_64" "revanced-extended" "inotia"
+# # Patch Youtube Armeabi-v7a
+# get_patches_key "youtube-revanced-extended"
+# patch "youtube-beta-armeabi-v7a" "revanced-extended" "inotia"
+# # Patch Youtube x86
+# get_patches_key "youtube-revanced-extended"
+# patch "youtube-beta-x86" "revanced-extended" "inotia"
+# # Patch Youtube x86_64
+# get_patches_key "youtube-revanced-extended"
+# patch "youtube-beta-x86_64" "revanced-extended" "inotia"
 
 # Patch YouTube Music Extended:
 # Arm64-v8a

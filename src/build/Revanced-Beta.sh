@@ -48,7 +48,7 @@ revanced_dl(){
 	revanced_dl
 	# Patch Google photos:
 	# Arm64-v8a
-	get_patches_key "gg-photos"
+	get_patches_key "gg-photos-rv-beta"
 	get_apk "com.google.android.apps.photos" "gg-photos-arm64-v8a-beta" "photos" "google-inc/photos/google-photos" "arm64-v8a" "nodpi"
 	patch "gg-photos-arm64-v8a-beta" "revanced"
 	# Armeabi-v7a
@@ -97,14 +97,14 @@ revanced_dl(){
 6() {
 	revanced_dl
 	# Patch Tumblr:
-	get_patches_key "tumblr"
-	get_apk "com.tumblr" "tumblr-beta" "tumblr" "tumblr-inc/tumblr/tumblr-social-media-art-blog" "Bundle_extract"
-	split_editor "tumblr-beta" "tumblr-beta"
-	patch "tumblr-beta" "revanced"
-	# Patch Tumblr Arm64-v8a:
-	get_patches_key "tumblr"
-	split_editor "tumblr-beta" "tumblr-arm64-v8a-beta" "exclude" "split_config.armeabi_v7a split_config.x86 split_config.x86_64"
-	patch "tumblr-arm64-v8a-beta" "revanced"
+	# get_patches_key "tumblr"
+	# get_apk "com.tumblr" "tumblr-beta" "tumblr" "tumblr-inc/tumblr/tumblr-social-media-art-blog" "Bundle_extract"
+	# split_editor "tumblr-beta" "tumblr-beta"
+	# patch "tumblr-beta" "revanced"
+	# # Patch Tumblr Arm64-v8a:
+	# get_patches_key "tumblr"
+	# split_editor "tumblr-beta" "tumblr-arm64-v8a-beta" "exclude" "split_config.armeabi_v7a split_config.x86 split_config.x86_64"
+	# patch "tumblr-arm64-v8a-beta" "revanced"
 	# Patch SoundCloud:
 	get_patches_key "soundcloud"
 	get_apk "com.soundcloud.android" "soundcloud-beta" "soundcloud-soundcloud" "soundcloud/soundcloud-soundcloud/soundcloud-play-music-songs" "Bundle_extract"
