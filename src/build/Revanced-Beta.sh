@@ -17,18 +17,18 @@ revanced_dl(){
 	get_patches_key "youtube-revanced" 
 	split_editor "youtube-beta" "youtube-beta-arm64-v8a" "exclude" "split_config.armeabi_v7a split_config.x86 split_config.x86_64"
 	patch "youtube-beta-arm64-v8a" "revanced"
-	# Patch Youtube Armeabi-v7a
-	get_patches_key "youtube-revanced" 
-	split_editor "youtube-beta" "youtube-beta-armeabi-v7a" "exclude" "split_config.arm64_v8a split_config.x86 split_config.x86_64"
-	patch "youtube-beta-armeabi-v7a" "revanced"
-	# Patch Youtube x86
-	get_patches_key "youtube-revanced" 
-	split_editor "youtube-beta" "youtube-beta-x86" "exclude" "split_config.arm64_v8a split_config.armeabi_v7a split_config.x86_64"
-	patch "youtube-beta-x86" "revanced"
-	# Patch Youtube x86_64
-	get_patches_key "youtube-revanced" 
-	split_editor "youtube-beta" "youtube-beta-x86_64" "exclude" "split_config.arm64_v8a split_config.armeabi_v7a split_config.x86"
-	patch "youtube-beta-x86_64" "revanced"
+	# # Patch Youtube Armeabi-v7a
+	# get_patches_key "youtube-revanced" 
+	# split_editor "youtube-beta" "youtube-beta-armeabi-v7a" "exclude" "split_config.arm64_v8a split_config.x86 split_config.x86_64"
+	# patch "youtube-beta-armeabi-v7a" "revanced"
+	# # Patch Youtube x86
+	# get_patches_key "youtube-revanced" 
+	# split_editor "youtube-beta" "youtube-beta-x86" "exclude" "split_config.arm64_v8a split_config.armeabi_v7a split_config.x86_64"
+	# patch "youtube-beta-x86" "revanced"
+	# # Patch Youtube x86_64
+	# get_patches_key "youtube-revanced" 
+	# split_editor "youtube-beta" "youtube-beta-x86_64" "exclude" "split_config.arm64_v8a split_config.armeabi_v7a split_config.x86"
+	# patch "youtube-beta-x86_64" "revanced"
 }
 2() {
 	revanced_dl
@@ -67,11 +67,11 @@ revanced_dl(){
 4() {
 	revanced_dl
 	# Patch Tiktok:
-	get_patches_key "tiktok"
-	url="https://tiktok.en.uptodown.com/android/download/1026195874-x" #Use uptodown because apkmirror ban tiktok in US lead github action can't download apk file
-	url="https://dw.uptodown.com/dwn/$(req "$url" - | $pup -p --charset utf-8 'button#detail-download-button attr{data-url}')"
-	req "$url" "tiktok-beta.apk"
-	patch "tiktok-beta" "revanced"
+	# get_patches_key "tiktok"
+	# url="https://tiktok.en.uptodown.com/android/download/1026195874-x" #Use uptodown because apkmirror ban tiktok in US lead github action can't download apk file
+	# url="https://dw.uptodown.com/dwn/$(req "$url" - | $pup -p --charset utf-8 'button#detail-download-button attr{data-url}')"
+	# req "$url" "tiktok-beta.apk"
+	# patch "tiktok-beta" "revanced"
 	# Patch Instagram:
 	# Arm64-v8a
 	get_patches_key "instagram"
@@ -81,9 +81,9 @@ revanced_dl(){
 5() {
 	revanced_dl
 	# Patch Pixiv:
-	get_patches_key "pixiv"
-	get_apkpure "jp.pxv.android" "pixiv-beta" "pixiv/jp.pxv.android"
-	patch "pixiv-beta" "revanced"
+	# get_patches_key "pixiv"
+	# get_apkpure "jp.pxv.android" "pixiv-beta" "pixiv/jp.pxv.android"
+	# patch "pixiv-beta" "revanced"
 	# Patch Twitch:
 	get_patches_key "twitch"
 	get_apk "tv.twitch.android.app" "twitch-beta" "twitch" "twitch-interactive-inc/twitch/twitch-live-streaming" "Bundle_extract"
@@ -118,11 +118,11 @@ revanced_dl(){
 7() {
 	revanced_dl
 	# Patch Lightroom:
-	get_patches_key "lightroom"
- 	url="https://adobe-lightroom-mobile.en.uptodown.com/android/download/1033600808" #Use uptodown because apkmirror always ask pass Cloudflare on this app
-	url="https://dw.uptodown.com/dwn/$(req "$url" - | $pup -p --charset utf-8 'button#detail-download-button attr{data-url}')"
-	req "$url" "lightroom-beta.apk"
-	patch "lightroom-beta" "revanced"
+	# get_patches_key "lightroom"
+ 	# url="https://adobe-lightroom-mobile.en.uptodown.com/android/download/1033600808" #Use uptodown because apkmirror always ask pass Cloudflare on this app
+	# url="https://dw.uptodown.com/dwn/$(req "$url" - | $pup -p --charset utf-8 'button#detail-download-button attr{data-url}')"
+	# req "$url" "lightroom-beta.apk"
+	# patch "lightroom-beta" "revanced"
 	# Patch RAR:
 	get_patches_key "rar"
 	get_apk "com.rarlab.rar" "rar-beta" "rar" "rarlab-published-by-win-rar-gmbh/rar/rar" "Bundle"
@@ -135,10 +135,10 @@ revanced_dl(){
 	get_patches_key "youtube-revanced"
 	split_editor "youtube-lite-beta" "youtube-lite-beta-arm64-v8a" "include" "split_config.arm64_v8a split_config.en split_config.xxxhdpi"
 	patch "youtube-lite-beta-arm64-v8a" "revanced"
-	# Patch YouTube Lite Armeabi-v7a:
-	get_patches_key "youtube-revanced"
-	split_editor "youtube-lite-beta" "youtube-lite-beta-armeabi-v7a" "include" "split_config.armeabi_v7a split_config.en split_config.xxxhdpi"
-	patch "youtube-lite-beta-armeabi-v7a" "revanced"
+	# # Patch YouTube Lite Armeabi-v7a:
+	# get_patches_key "youtube-revanced"
+	# split_editor "youtube-lite-beta" "youtube-lite-beta-armeabi-v7a" "include" "split_config.armeabi_v7a split_config.en split_config.xxxhdpi"
+	# patch "youtube-lite-beta-armeabi-v7a" "revanced"
 }
 9() {
 	revanced_dl
@@ -147,26 +147,26 @@ revanced_dl(){
 	get_patches_key "youtube-music-revanced"
 	get_apk "com.google.android.apps.youtube.music" "youtube-music-beta-arm64-v8a" "youtube-music" "google-inc/youtube-music/youtube-music" "arm64-v8a"
 	patch "youtube-music-beta-arm64-v8a" "revanced"
-	# Armeabi-v7a
-	get_patches_key "youtube-music-revanced"
-	get_apk "com.google.android.apps.youtube.music" "youtube-music-beta-armeabi-v7a" "youtube-music" "google-inc/youtube-music/youtube-music" "armeabi-v7a"
-	patch "youtube-music-beta-armeabi-v7a" "revanced"
-	# x86_64
-	get_patches_key "youtube-music-revanced"
-	get_apk "com.google.android.apps.youtube.music" "youtube-music-beta-x86_64" "youtube-music" "google-inc/youtube-music/youtube-music" "x86_64"
-	patch "youtube-music-beta-x86_64" "revanced"
-	# x86
-	get_patches_key "youtube-music-revanced"
-	get_apk "com.google.android.apps.youtube.music" "youtube-music-beta-x86" "youtube-music" "google-inc/youtube-music/youtube-music" "x86"
-	patch "youtube-music-beta-x86" "revanced"
+	# # Armeabi-v7a
+	# get_patches_key "youtube-music-revanced"
+	# get_apk "com.google.android.apps.youtube.music" "youtube-music-beta-armeabi-v7a" "youtube-music" "google-inc/youtube-music/youtube-music" "armeabi-v7a"
+	# patch "youtube-music-beta-armeabi-v7a" "revanced"
+	# # x86_64
+	# get_patches_key "youtube-music-revanced"
+	# get_apk "com.google.android.apps.youtube.music" "youtube-music-beta-x86_64" "youtube-music" "google-inc/youtube-music/youtube-music" "x86_64"
+	# patch "youtube-music-beta-x86_64" "revanced"
+	# # x86
+	# get_patches_key "youtube-music-revanced"
+	# get_apk "com.google.android.apps.youtube.music" "youtube-music-beta-x86" "youtube-music" "google-inc/youtube-music/youtube-music" "x86"
+	# patch "youtube-music-beta-x86" "revanced"
 }
 10() {
 	revanced_dl
-	# Patch Duolingo
-	get_patches_key "Duolingo"
-	lock_version="1"
-	get_apk "com.duolingo" "duolingo-beta" "duolingo-duolingo" "duolingo/duolingo-duolingo/duolingo-language-lessons" "Bundle"
-	patch "duolingo-beta" "revanced"
+	# # Patch Duolingo
+	# get_patches_key "Duolingo"
+	# lock_version="1"
+	# get_apk "com.duolingo" "duolingo-beta" "duolingo-duolingo" "duolingo/duolingo-duolingo/duolingo-language-lessons" "Bundle"
+	# patch "duolingo-beta" "revanced"`
 	# Patch Google News Arm64-v8a
 	get_patches_key "GoogleNews"
 	get_apk "com.google.android.apps.magazines" "googlenews-beta" "google-news" "google-inc/google-news/google-news" "Bundle_extract"
@@ -181,9 +181,9 @@ revanced_dl(){
 	split_editor "photomath-beta" "photomath-beta"
 	patch "photomath-beta" "revanced"
 	# Patch Strava:
-	get_patches_key "strava"
-	get_apkpure "com.strava" "strava-beta-arm64-v8a" "strava-run-hike-2025-health/com.strava" "Bundle"
-	patch "strava-beta-arm64-v8a" "revanced"
+	# get_patches_key "strava"
+	# get_apkpure "com.strava" "strava-beta-arm64-v8a" "strava-run-hike-2025-health/com.strava" "Bundle"
+	# patch "strava-beta-arm64-v8a" "revanced"
 }
 12() {
 	revanced_dl
@@ -219,9 +219,9 @@ revanced_dl(){
 	split_editor "crunchyroll-beta" "crunchyroll-beta"
 	patch "crunchyroll-beta" "revanced"
 	# Patch Viber
-	get_patches_key "Viber-revanced"
-	get_apk "com.viber.voip" "viber-beta" "viber" "viber-media-s-a-r-l/viber/rakuten-viber-messenger"
-	patch "viber-beta" "revanced"
+	# get_patches_key "Viber-revanced"
+	# get_apk "com.viber.voip" "viber-beta" "viber" "viber-media-s-a-r-l/viber/rakuten-viber-messenger"
+	# patch "viber-beta" "revanced"
 }
 15() {
 	revanced_dl
@@ -247,11 +247,11 @@ revanced_dl(){
 	get_apk "ch.protonvpn.android" "protonvpn-beta" "protonvpn-free-vpn-secure-unlimited-fdroid-version" "proton-technologies-ag/protonvpn-free-vpn-secure-unlimited-fdroid-version/protonvpn-fast-secure-vpn-f-droid-version"
 	patch "protonvpn-beta" "revanced"
 	# Patch MyFitnessPal
-	get_patches_key "MyFitnessPal"
- 	url="https://calorie-counter-myfitnesspal.en.uptodown.com/android/download/1010004885" #Use uptodown because apkmirror always ask pass Cloudflare on this app
-	url="https://dw.uptodown.com/dwn/$(req "$url" - | $pup -p --charset utf-8 'button#detail-download-button attr{data-url}')"
-	req "$url" "MyFitnessPal-beta.apk"
-	patch "MyFitnessPal-beta" "revanced"
+	# get_patches_key "MyFitnessPal"
+ 	# url="https://calorie-counter-myfitnesspal.en.uptodown.com/android/download/1010004885" #Use uptodown because apkmirror always ask pass Cloudflare on this app
+	# url="https://dw.uptodown.com/dwn/$(req "$url" - | $pup -p --charset utf-8 'button#detail-download-button attr{data-url}')"
+	# req "$url" "MyFitnessPal-beta.apk"
+	# patch "MyFitnessPal-beta" "revanced"
 }
 case "$1" in
     1)

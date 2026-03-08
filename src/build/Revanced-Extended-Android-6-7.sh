@@ -15,15 +15,15 @@ patch "youtube" "revanced-extended-android-6-7" "inotia"
 get_patches_key "youtube-revanced-extended-6-7"
 split_editor "youtube" "youtube-arm64-v8a" "exclude" "split_config.armeabi_v7a split_config.x86 split_config.x86_64"
 patch "youtube-arm64-v8a" "revanced-extended-android-6-7" "inotia"
-# Patch Youtube Armeabi-v7a
-get_patches_key "youtube-revanced-extended-6-7"
-split_editor "youtube" "youtube-armeabi-v7a" "exclude" "split_config.arm64_v8a split_config.x86 split_config.x86_64"
-patch "youtube-armeabi-v7a" "revanced-extended-android-6-7" "inotia"
-# Patch Youtube x86
-get_patches_key "youtube-revanced-extended-6-7"
-split_editor "youtube" "youtube-x86" "exclude" "split_config.arm64_v8a split_config.armeabi_v7a split_config.x86_64"
-patch "youtube-x86" "revanced-extended-android-6-7" "inotia"
-# Patch Youtube x86_64
-get_patches_key "youtube-revanced-extended-6-7"
-split_editor "youtube" "youtube-x86_64" "exclude" "split_config.arm64_v8a split_config.armeabi_v7a split_config.x86"
-patch "youtube-x86_64" "revanced-extended-android-6-7" "inotia"
+# # Patch Youtube Armeabi-v7a
+# get_patches_key "youtube-revanced-extended-6-7"
+# split_editor "youtube" "youtube-armeabi-v7a" "exclude" "split_config.arm64_v8a split_config.x86 split_config.x86_64"
+# patch "youtube-armeabi-v7a" "revanced-extended-android-6-7" "inotia"
+# # Patch Youtube x86
+# get_patches_key "youtube-revanced-extended-6-7"
+# split_editor "youtube" "youtube-x86" "exclude" "split_config.arm64_v8a split_config.armeabi_v7a split_config.x86_64"
+# patch "youtube-x86" "revanced-extended-android-6-7" "inotia"
+# # Patch Youtube x86_64
+# get_patches_key "youtube-revanced-extended-6-7"
+# split_editor "youtube" "youtube-x86_64" "exclude" "split_config.arm64_v8a split_config.armeabi_v7a split_config.x86"
+# patch "youtube-x86_64" "revanced-extended-android-6-7" "inotia"

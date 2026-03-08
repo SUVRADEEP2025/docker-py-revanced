@@ -1,15 +1,14 @@
-name: GitHub Cleanup
+
+name: clean artifacts
 
 on:
-  workflow_call:
-    secrets:
-      GH_TOKEN:
-        required: true
-  workflow_dispatch:
+  workflow_dispatch
 
 jobs:
-  cleanup:
-    name: GitHub Cleanup
-    uses: nikhilbadyal/ghactions/.github/workflows/github-cleanup.yml@main
-    secrets:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  clean:
+    runs-on: ubuntu-latest
+    steps:
+      - name: cleanup
+        uses: glassechidna/artifact-cleaner@master
+        with:
+          minimumAge: 86400 # all artifacts at least one day old

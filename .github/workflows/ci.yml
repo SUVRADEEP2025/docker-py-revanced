@@ -2,7 +2,7 @@ name: 2. Check new patch
 permissions: write-all
 on:
   schedule:
-    - cron: "0 9 */7 * *"
+    - cron: "0 9 */3 * *"
   workflow_dispatch:
     inputs:
       retry_count:
@@ -21,10 +21,10 @@ jobs:
       - name: Check github connection
         id: check-gh
         run: bash src/etc/connection.sh
-      # - name: Check new patch ReVanced
-      #   id: check-rv
-      #   if: steps.check-gh.outputs.internet_error == '0'
-      #   run: bash src/etc/ci.sh ReVanced/revanced-patches latest youtube-revanced.apk
+      - name: Check new patch ReVanced
+        id: check-rv
+        if: steps.check-gh.outputs.internet_error == '0'
+        run: bash src/etc/ci.sh ReVanced/revanced-patches latest youtube-revanced.apk
       - name: Check new patch ReVanced Beta
         id: check-rv-beta
         if: steps.check-gh.outputs.internet_error == '0'
@@ -37,10 +37,10 @@ jobs:
         id: check-morphe-beta
         if: steps.check-gh.outputs.internet_error == '0'
         run: bash src/etc/ci.sh MorpheApp/morphe-patches prerelease youtube-beta-morphe.apk
-      # - name: Check new patch Revanced Extended forked by Anddea Stable Version
-      #   id: check-rve-anddea-stable
-      #   if: steps.check-gh.outputs.internet_error == '0'
-      #   run: bash src/etc/ci.sh anddea/revanced-patches latest youtube-stable-anddea.apk
+      - name: Check new patch Revanced Extended forked by Anddea Stable Version
+        id: check-rve-anddea-stable
+        if: steps.check-gh.outputs.internet_error == '0'
+        run: bash src/etc/ci.sh anddea/revanced-patches latest youtube-stable-anddea.apk
       - name: Check new patch Revanced Extended forked by Anddea Beta Version
         id: check-rve-anddea-beta
         if: steps.check-gh.outputs.internet_error == '0'
@@ -49,10 +49,10 @@ jobs:
       #   id: check-rve
       #   if: steps.check-gh.outputs.internet_error == '0'
       #   run: bash src/etc/ci.sh inotia00/revanced-patches latest youtube-revanced-extended.apk
-      - name: Check new patch Revanced Extended Beta
-        id: check-rve-beta
-        if: steps.check-gh.outputs.internet_error == '0'
-        run: bash src/etc/ci.sh inotia00/revanced-patches prerelease youtube-beta-revanced-extended.apk
+      # - name: Check new patch Revanced Extended Beta
+      #   id: check-rve-beta
+      #   if: steps.check-gh.outputs.internet_error == '0'
+      #   run: bash src/etc/ci.sh inotia00/revanced-patches prerelease youtube-beta-revanced-extended.apk
       # - name: Check new patch Revanced Extended Arsclib
       #   id: check-rve-arsclib
       #   if: steps.check-gh.outputs.internet_error == '0'
@@ -61,10 +61,10 @@ jobs:
       #   id: check-twitter-piko-stable
       #   if: steps.check-gh.outputs.internet_error == '0'
       #   run: bash src/etc/ci.sh crimera/piko latest twitter-stable-piko.apk
-      - name: Check new patch Twitter Piko Beta
-        id: check-twitter-piko-beta
-        if: steps.check-gh.outputs.internet_error == '0'
-        run: bash src/etc/ci.sh crimera/piko prerelease twitter-beta-piko.apk
+      # - name: Check new patch Twitter Piko Beta
+      #   id: check-twitter-piko-beta
+      #   if: steps.check-gh.outputs.internet_error == '0'
+      #   run: bash src/etc/ci.sh crimera/piko prerelease twitter-beta-piko.apk
       # - name: Check new patch Revanced For Android 6 & 7
       #   id: check-rve67
       #   if: steps.check-gh.outputs.internet_error == '0'
@@ -103,31 +103,31 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           retry_count: ${{ github.event.inputs.retry_count }}
-          max_retries: 3
+          max_retries: 5
     outputs:
-      # check_rv: ${{ steps.check-rv.outputs.new_patch }}
+      check_rv: ${{ steps.check-rv.outputs.new_patch }}
       check_rv_beta: ${{ steps.check-rv-beta.outputs.new_patch }}
       check_morphe: ${{ steps.check-morphe.outputs.new_patch }}
       check_morphe_beta: ${{ steps.check-morphe-beta.outputs.new_patch }}
-      # check_rve_anddea_stable: ${{ steps.check-rve-anddea-stable.outputs.new_patch }}
+      check_rve_anddea_stable: ${{ steps.check-rve-anddea-stable.outputs.new_patch }}
       check_rve_anddea_beta: ${{ steps.check-rve-anddea-beta.outputs.new_patch }}
       # check_rve: ${{ steps.check-rve.outputs.new_patch }}
-      check_rve_beta: ${{ steps.check-rve-beta.outputs.new_patch }}
+      # check_rve_beta: ${{ steps.check-rve-beta.outputs.new_patch }}
       # check_rve_arsclib: ${{ steps.check-rve-arsclib.outputs.new_patch }}
       # check_twitter_piko_stable: ${{ steps.check-twitter-piko-stable.outputs.new_patch }}
-      check_twitter_piko_beta: ${{ steps.check-twitter-piko-beta.outputs.new_patch }}
+      # check_twitter_piko_beta: ${{ steps.check-twitter-piko-beta.outputs.new_patch }}
       # check_rve67: ${{ steps.check-rve67.outputs.new_patch }}
       # check_rve5: ${{ steps.check-rve5.outputs.new_patch }}
       # check_BiliRoamingM: ${{ steps.check-BiliRoamingM.outputs.new_patch }}
       check_Revanced_Experiments: ${{ steps.check-Revanced-Experiments.outputs.new_patch }}
 
-  # Patch-Revanced:
-  #   name: Patch Revanced Stable
-  #   needs: check
-  #   if: ${{ needs.check.outputs.check_rv == 1 }}
-  #   uses: ./.github/workflows/manual-patch.yml
-  #   with:
-  #     org: "Revanced"
+  Patch-Revanced:
+    name: Patch Revanced Stable
+    needs: check
+    if: ${{ needs.check.outputs.check_rv == 1 }}
+    uses: ./.github/workflows/manual-patch.yml
+    with:
+      org: "Revanced"
   Patch-Revanced-Beta:
     name: Patch Revanced Beta
     needs: check
@@ -149,13 +149,13 @@ jobs:
     uses: ./.github/workflows/manual-patch.yml
     with:
       org: "Morphe Beta"
-  # Patch-RVE-anddea-stable:
-  #   name: Patch RVX Anddea Stable
-  #   needs: check
-  #   if: ${{ needs.check.outputs.check_rve_anddea_stable == 1 }}
-  #   uses: ./.github/workflows/manual-patch.yml
-  #   with:
-  #     org: "RVE-anddea-stable"
+  Patch-RVE-anddea-stable:
+    name: Patch RVX Anddea Stable
+    needs: check
+    if: ${{ needs.check.outputs.check_rve_anddea_stable == 1 }}
+    uses: ./.github/workflows/manual-patch.yml
+    with:
+      org: "RVE-anddea-stable"
   Patch-RVE-anddea-beta:
     name: Patch RVX Anddea Beta
     needs: check
@@ -170,13 +170,13 @@ jobs:
   #   uses: ./.github/workflows/manual-patch.yml
   #   with:
   #     org: "Revanced Extended"
-  Patch-Revanced-Extended-Beta:
-    name: Patch Revanced Extended Beta
-    needs: check
-    if: ${{ needs.check.outputs.check_rve_beta == 1 }}
-    uses: ./.github/workflows/manual-patch.yml
-    with:
-      org: "Revanced Extended Beta"
+  # Patch-Revanced-Extended-Beta:
+  #   name: Patch Revanced Extended Beta
+  #   needs: check
+  #   if: ${{ needs.check.outputs.check_rve_beta == 1 }}
+  #   uses: ./.github/workflows/manual-patch.yml
+  #   with:
+  #     org: "Revanced Extended Beta"
   # Patch-Revanced-Extended-Arsclib:
   #   name: Patch Revanced Extended Arsclib
   #   needs: check
@@ -191,13 +191,13 @@ jobs:
   #   uses: ./.github/workflows/manual-patch.yml
     # with:
     #   org: "Twitter Piko Stable"
-  Patch-Twitter-Piko-Beta:
-    name: Patch Twitter Piko Beta
-    needs: check
-    if: ${{ needs.check.outputs.check_twitter_piko_beta == 1 }}
-    uses: ./.github/workflows/manual-patch.yml
-    with:
-      org: "Twitter Piko Beta"
+  # Patch-Twitter-Piko-Beta:
+  #   name: Patch Twitter Piko Beta
+  #   needs: check
+  #   if: ${{ needs.check.outputs.check_twitter_piko_beta == 1 }}
+  #   uses: ./.github/workflows/manual-patch.yml
+  #   with:
+  #     org: "Twitter Piko Beta"
   # Patch-Revanced-Extended-For-Android-6-7:
   #   name: Patch RVX Android 6 & 7
   #   needs: check
