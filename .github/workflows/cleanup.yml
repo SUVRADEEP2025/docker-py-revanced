@@ -2,7 +2,11 @@
 name: clean artifacts
 
 on:
-  workflow_dispatch
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: write
 
 jobs:
   clean:
@@ -12,3 +16,14 @@ jobs:
         uses: glassechidna/artifact-cleaner@master
         with:
           minimumAge: 86400 # all artifacts at least one day old
+  # cleanup-releases:
+  #   runs-on: ubuntu-latest
+  #   name: Clean up old releases
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: Nats-ji/delete-old-releases@v1
+  #       with:
+  #         token: ${{ secrets.GITHUB_TOKEN }}
+  #         keep-count: 2
+  #         keep-old-minor-releases: False
+  #         keep-old-minor-releases-count: 1
