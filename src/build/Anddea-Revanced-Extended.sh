@@ -27,14 +27,14 @@ patch "youtube-stable-arm64-v8a" "anddea" "inotia"
 # split_editor "youtube-stable" "youtube-stable-x86_64" "exclude" "split_config.arm64_v8a split_config.armeabi_v7a split_config.x86"
 # patch "youtube-stable-x86_64" "anddea" "inotia"
 # Patch YouTube:
-#get_patches_key "youtube-rve-anddea"
-#get_apk "com.google.android.youtube" "youtube-stable" "youtube" "google-inc/youtube/youtube"
-#patch "youtube-stable" "anddea" "inotia"
+get_patches_key "youtube-rve-anddea"
+get_apk "com.google.android.youtube" "youtube-stable" "youtube" "google-inc/youtube/youtube"
+patch "youtube-stable" "anddea" "inotia"
 # Split architecture Youtube:
-#get_patches_key "youtube-rve-anddea"
-#for i in {0..3}; do
-#  split_arch "youtube-stable" "anddea" "$(gen_rip_libs ${libs[i]})"
-#done
+get_patches_key "youtube-rve-anddea"
+for i in {0..3}; do
+  split_arch "youtube-stable" "anddea" "$(gen_rip_libs ${libs[i]})"
+done
 
 # Patch YouTube Music:
 # Arm64-v8a
@@ -61,9 +61,9 @@ get_apkpure "com.spot"$j"fy.music" "spotjfy-arm64-v8a" "spot"$j"fy-music-and-pod
 patch "spotjfy-arm64-v8a" "anddea"
 
 # Patch YouTube Lite Arm64-v8a:
-get_patches_key "youtube-rve-anddea"
-split_editor "youtube-stable" "youtube-lite-arm64-v8a" "include" "split_config.arm64_v8a split_config.en split_config.xhdpi split_config.xxxhdpi"
-patch "youtube-lite-arm64-v8a" "anddea" "inotia"
+# get_patches_key "youtube-rve-anddea"
+# split_editor "youtube-stable" "youtube-lite-arm64-v8a" "include" "split_config.arm64_v8a split_config.en split_config.xhdpi split_config.xxxhdpi"
+# patch "youtube-lite-arm64-v8a" "anddea" "inotia"
 # Patch YouTube Lite Armeabi-v7a:
 # get_patches_key "youtube-rve-anddea"
 # split_editor "youtube-stable" "youtube-lite-armeabi-v7a" "include" "split_config.armeabi_v7a split_config.en split_config.xhdpi split_config.xxxhdpi"

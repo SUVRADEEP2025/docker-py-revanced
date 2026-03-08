@@ -85,14 +85,14 @@ revanced_dl(){
 	# get_apkpure "jp.pxv.android" "pixiv-beta" "pixiv/jp.pxv.android"
 	# patch "pixiv-beta" "revanced"
 	# Patch Twitch:
-	get_patches_key "twitch"
-	get_apk "tv.twitch.android.app" "twitch-beta" "twitch" "twitch-interactive-inc/twitch/twitch-live-streaming" "Bundle_extract"
- 	split_editor "twitch-beta" "twitch-beta"
-	patch "twitch-beta" "revanced"
-	# Patch Twitch Arm64-v8a:
-	get_patches_key "twitch"
-	split_editor "twitch-beta" "twitch-arm64-v8a-beta" "exclude" "split_config.armeabi_v7a split_config.x86 split_config.x86_64"
-	patch "twitch-arm64-v8a-beta" "revanced"
+	# get_patches_key "twitch"
+	# get_apk "tv.twitch.android.app" "twitch-beta" "twitch" "twitch-interactive-inc/twitch/twitch-live-streaming" "Bundle_extract"
+ 	# split_editor "twitch-beta" "twitch-beta"
+	# patch "twitch-beta" "revanced"
+	# # Patch Twitch Arm64-v8a:
+	# get_patches_key "twitch"
+	# split_editor "twitch-beta" "twitch-arm64-v8a-beta" "exclude" "split_config.armeabi_v7a split_config.x86 split_config.x86_64"
+	# patch "twitch-arm64-v8a-beta" "revanced"
 }
 6() {
 	revanced_dl
@@ -105,15 +105,15 @@ revanced_dl(){
 	# get_patches_key "tumblr"
 	# split_editor "tumblr-beta" "tumblr-arm64-v8a-beta" "exclude" "split_config.armeabi_v7a split_config.x86 split_config.x86_64"
 	# patch "tumblr-arm64-v8a-beta" "revanced"
-	# Patch SoundCloud:
-	get_patches_key "soundcloud"
-	get_apk "com.soundcloud.android" "soundcloud-beta" "soundcloud-soundcloud" "soundcloud/soundcloud-soundcloud/soundcloud-play-music-songs" "Bundle_extract"
-	split_editor "soundcloud-beta" "soundcloud-beta"
-	patch "soundcloud-beta" "revanced"
-	# Patch SoundCloud Arm64-v8a:
-	get_patches_key "soundcloud"
-	split_editor "soundcloud-beta" "soundcloud-arm64-v8a-beta" "exclude" "split_config.armeabi_v7a split_config.x86 split_config.x86_64"
-	patch "soundcloud-arm64-v8a-beta" "revanced"
+	# # Patch SoundCloud:
+	# get_patches_key "soundcloud"
+	# get_apk "com.soundcloud.android" "soundcloud-beta" "soundcloud-soundcloud" "soundcloud/soundcloud-soundcloud/soundcloud-play-music-songs" "Bundle_extract"
+	# split_editor "soundcloud-beta" "soundcloud-beta"
+	# patch "soundcloud-beta" "revanced"
+	# # Patch SoundCloud Arm64-v8a:
+	# get_patches_key "soundcloud"
+	# split_editor "soundcloud-beta" "soundcloud-arm64-v8a-beta" "exclude" "split_config.armeabi_v7a split_config.x86 split_config.x86_64"
+	# patch "soundcloud-arm64-v8a-beta" "revanced"
 }
 7() {
 	revanced_dl
@@ -124,9 +124,9 @@ revanced_dl(){
 	# req "$url" "lightroom-beta.apk"
 	# patch "lightroom-beta" "revanced"
 	# Patch RAR:
-	get_patches_key "rar"
-	get_apk "com.rarlab.rar" "rar-beta" "rar" "rarlab-published-by-win-rar-gmbh/rar/rar" "Bundle"
-	patch "rar-beta" "revanced"
+	# get_patches_key "rar"
+	# get_apk "com.rarlab.rar" "rar-beta" "rar" "rarlab-published-by-win-rar-gmbh/rar/rar" "Bundle"
+	# patch "rar-beta" "revanced"
 }
 8() {
 	revanced_dl
@@ -176,10 +176,10 @@ revanced_dl(){
 11() {
 	revanced_dl
 	# Patch Photomath
-	get_patches_key "Photomath"
-	get_apk "com.microblink.photomath" "photomath-beta" "photomath" "google-inc/photomath/photomath" "Bundle" "Bundle_extract"
-	split_editor "photomath-beta" "photomath-beta"
-	patch "photomath-beta" "revanced"
+	# get_patches_key "Photomath"
+	# get_apk "com.microblink.photomath" "photomath-beta" "photomath" "google-inc/photomath/photomath" "Bundle" "Bundle_extract"
+	# split_editor "photomath-beta" "photomath-beta"
+	# patch "photomath-beta" "revanced"
 	# Patch Strava:
 	# get_patches_key "strava"
 	# get_apkpure "com.strava" "strava-beta-arm64-v8a" "strava-run-hike-2025-health/com.strava" "Bundle"
@@ -193,9 +193,9 @@ revanced_dl(){
 	get_apkpure "com.spot"$j"fy.music" "spotjfy-beta-arm64-v8a" "spot"$j"fy-music-and-podcasts-for-android/com.spot"$j"fy.music"
 	patch "spotjfy-beta-arm64-v8a" "revanced"
 	# Patch Proton mail
-	get_patches_key "protonmail-revanced"
-	get_apkpure "ch.protonmail.android" "protonmail-beta" "proton-mail-encrypted-email/ch.protonmail.android"
-	patch "protonmail-beta" "revanced"
+	# get_patches_key "protonmail-revanced"
+	# get_apkpure "ch.protonmail.android" "protonmail-beta" "proton-mail-encrypted-email/ch.protonmail.android"
+	# patch "protonmail-beta" "revanced"
 }
 13() {
 	revanced_dl

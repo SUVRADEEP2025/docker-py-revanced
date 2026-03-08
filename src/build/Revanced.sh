@@ -69,54 +69,54 @@ revanced_dl(){
 }
 4() {
 	revanced_dl
-	# Patch Tiktok:
-	get_patches_key "tiktok"
-	url="https://tiktok.en.uptodown.com/android/download/1026195874-x" #Use uptodown because apkmirror ban tiktok in US lead github action can't download apk file
-	url="https://dw.uptodown.com/dwn/$(req "$url" - | $pup -p --charset utf-8 'button#detail-download-button attr{data-url}')"
-	req "$url" "tiktok.apk"
-	patch "tiktok" "revanced"
+	# # Patch Tiktok:
+	# get_patches_key "tiktok"
+	# url="https://tiktok.en.uptodown.com/android/download/1026195874-x" #Use uptodown because apkmirror ban tiktok in US lead github action can't download apk file
+	# url="https://dw.uptodown.com/dwn/$(req "$url" - | $pup -p --charset utf-8 'button#detail-download-button attr{data-url}')"
+	# req "$url" "tiktok.apk"
+	# patch "tiktok" "revanced"
 	# Patch Instagram:
 	# Arm64-v8a
-	get_patches_key "instagram"
- 	get_apkpure "com.instagram.android" "instagram-arm64-v8a" "instagram-android/com.instagram.android" "Bundle"
-	patch "instagram-arm64-v8a" "revanced"
+	# get_patches_key "instagram"
+ 	# get_apkpure "com.instagram.android" "instagram-arm64-v8a" "instagram-android/com.instagram.android" "Bundle"
+	# patch "instagram-arm64-v8a" "revanced"
 }
 5() {
 	revanced_dl
 	# Patch Pixiv:
-	get_patches_key "pixiv"
-	get_apkpure "jp.pxv.android" "pixiv" "pixiv/jp.pxv.android"
-	patch "pixiv" "revanced"
+	# get_patches_key "pixiv"
+	# get_apkpure "jp.pxv.android" "pixiv" "pixiv/jp.pxv.android"
+	# patch "pixiv" "revanced"
 	# Patch Twitch:
-	get_patches_key "twitch"
-	get_apk "tv.twitch.android.app" "twitch" "twitch" "twitch-interactive-inc/twitch/twitch-live-streaming" "Bundle_extract"
-	split_editor "twitch" "twitch"
-	patch "twitch" "revanced"
+	# get_patches_key "twitch"
+	# get_apk "tv.twitch.android.app" "twitch" "twitch" "twitch-interactive-inc/twitch/twitch-live-streaming" "Bundle_extract"
+	# split_editor "twitch" "twitch"
+	# patch "twitch" "revanced"
 	# Patch Twitch Arm64-v8a:
-	get_patches_key "twitch"
-	split_editor "twitch" "twitch-arm64-v8a" "exclude" "split_config.armeabi_v7a split_config.x86 split_config.x86_64"
-	patch "twitch-arm64-v8a" "revanced"
+	# get_patches_key "twitch"
+	# split_editor "twitch" "twitch-arm64-v8a" "exclude" "split_config.armeabi_v7a split_config.x86 split_config.x86_64"
+	# patch "twitch-arm64-v8a" "revanced"
 }
 6() {
 	revanced_dl
 	# Patch Tumblr:
-	get_patches_key "tumblr"
-	get_apk "com.tumblr" "tumblr" "tumblr" "tumblr-inc/tumblr/tumblr-social-media-art-blog" "Bundle_extract"
-	split_editor "tumblr" "tumblr"
-	patch "tumblr" "revanced"
-	# Patch Tumblr Arm64-v8a:
-	get_patches_key "tumblr"
-	split_editor "tumblr" "tumblr-arm64-v8a" "exclude" "split_config.armeabi_v7a split_config.x86 split_config.x86_64"
-	patch "tumblr-arm64-v8a" "revanced"
-	# Patch SoundCloud:
-	get_patches_key "soundcloud"
-	get_apk "com.soundcloud.android" "soundcloud" "soundcloud-soundcloud" "soundcloud/soundcloud-soundcloud/soundcloud-play-music-songs" "Bundle_extract"
-	split_editor "soundcloud" "soundcloud"
-	patch "soundcloud" "revanced"
-	# Patch SoundCloud Arm64-v8a:
-	get_patches_key "soundcloud"
-	split_editor "soundcloud" "soundcloud-arm64-v8a" "exclude" "split_config.armeabi_v7a split_config.x86 split_config.x86_64"
-	patch "soundcloud-arm64-v8a" "revanced"
+	# get_patches_key "tumblr"
+	# get_apk "com.tumblr" "tumblr" "tumblr" "tumblr-inc/tumblr/tumblr-social-media-art-blog" "Bundle_extract"
+	# split_editor "tumblr" "tumblr"
+	# patch "tumblr" "revanced"
+	# # Patch Tumblr Arm64-v8a:
+	# get_patches_key "tumblr"
+	# split_editor "tumblr" "tumblr-arm64-v8a" "exclude" "split_config.armeabi_v7a split_config.x86 split_config.x86_64"
+	# patch "tumblr-arm64-v8a" "revanced"
+	# # Patch SoundCloud:
+	# get_patches_key "soundcloud"
+	# get_apk "com.soundcloud.android" "soundcloud" "soundcloud-soundcloud" "soundcloud/soundcloud-soundcloud/soundcloud-play-music-songs" "Bundle_extract"
+	# split_editor "soundcloud" "soundcloud"
+	# patch "soundcloud" "revanced"
+	# # Patch SoundCloud Arm64-v8a:
+	# get_patches_key "soundcloud"
+	# split_editor "soundcloud" "soundcloud-arm64-v8a" "exclude" "split_config.armeabi_v7a split_config.x86 split_config.x86_64"
+	# patch "soundcloud-arm64-v8a" "revanced"
 }
 7() {
 	revanced_dl
@@ -191,14 +191,14 @@ revanced_dl(){
 12() {
 	revanced_dl
 	# Patch Spotjfy Arm64-v8a
-	j="i"
-	get_patches_key "Spotjfy-revanced"
-	get_apkpure "com.spot"$j"fy.music" "spotjfy-arm64-v8a" "spot"$j"fy-music-and-podcasts-for-android/com.spot"$j"fy.music"
-	patch "spotjfy-arm64-v8a" "revanced"
+	# j="i"
+	# get_patches_key "Spotjfy-revanced"
+	# get_apkpure "com.spot"$j"fy.music" "spotjfy-arm64-v8a" "spot"$j"fy-music-and-podcasts-for-android/com.spot"$j"fy.music"
+	# patch "spotjfy-arm64-v8a" "revanced"
 	# Patch Proton mail
-	get_patches_key "protonmail-revanced"
-	get_apk "ch.protonmail.android" "protonmail" "protonmail-encrypted-email" "proton-technologies-ag/protonmail-encrypted-email/proton-mail-encrypted-email"
-	patch "protonmail" "revanced"
+	# get_patches_key "protonmail-revanced"
+	# get_apk "ch.protonmail.android" "protonmail" "protonmail-encrypted-email" "proton-technologies-ag/protonmail-encrypted-email/proton-mail-encrypted-email"
+	# patch "protonmail" "revanced"
 }
 13() {
 	revanced_dl
