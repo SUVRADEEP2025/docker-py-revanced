@@ -18,17 +18,3 @@ jobs:
         with:
           name: microg
           path: 1microg.apk
-
-  release:
-    needs: check-update
-    runs-on: ubuntu-latest
-    env:
-      repository: ${{ github.repository }}
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    steps:
-      - uses: actions/download-artifact@main
-        with:
-          name: microg
-      - uses: ./.github/actions/release
-        with:
-          files: 1microg.apk
