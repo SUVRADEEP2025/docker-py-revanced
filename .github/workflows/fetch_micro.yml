@@ -28,7 +28,7 @@ jobs:
           mv "$file" 1microg.apk
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v6.0.2
+        uses: actions/upload-artifact@main
         with:
           name: microg
           path: 1microg.apk
