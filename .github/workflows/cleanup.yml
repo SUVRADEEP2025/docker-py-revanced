@@ -4,11 +4,6 @@ permissions: write-all
 on:
   workflow_dispatch:
 
-permissions:
-  actions: write-all
-  contents: write-all
-  packages: write-all
-
 jobs:
   clean:
     runs-on: ubuntu-latest
