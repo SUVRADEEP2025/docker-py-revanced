@@ -1,15 +1,22 @@
 #!/bin/bash
 
-mkdir ./release ./download
+# Ensure output directories exist; keep previous downloads for cache.
+mkdir -p ./release ./download
 
-#Setup pup for download apk files
-wget -q -O ./pup.zip https://github.com/ericchiang/pup/releases/download/v0.4.0/pup_v0.4.0_linux_amd64.zip
-unzip "./pup.zip" -d "./" > /dev/null 2>&1
+# Setup pup for downloading APK files (cached)
+if [ ! -f "./pup" ]; then
+  if [ ! -f "./pup.zip" ]; then
+    wget -q -O ./pup.zip https://github.com/ericchiang/pup/releases/download/v0.4.0/pup_v0.4.0_linux_amd64.zip
+  fi
+  unzip -o "./pup.zip" -d "./" > /dev/null 2>&1
+fi
 pup="./pup"
-#Setup APKEditor for install combine split apks
-wget -q -O ./APKEditor.jar https://github.com/REAndroid/APKEditor/releases/download/V1.4.7/APKEditor-1.4.7.jar
+# Setup APKEditor for install/combining split apks (cached)
+if [ ! -f "./APKEditor.jar" ]; then
+  wget -q -O ./APKEditor.jar https://github.com/REAndroid/APKEditor/releases/download/V1.4.7/APKEditor-1.4.7.jar
+fi
 APKEditor="./APKEditor.jar"
-#Find lastest user_agent
+# Find latest user_agent
 user_agent=$(wget -qO- https://www.whatismybrowser.com/guides/the-latest-user-agent/firefox | tr '\n' ' ' | sed 's#</tr>#\n#g' | grep 'Firefox (Standard)' | sed -n 's/.*<span class="code">\([^<]*Android[^<]*\)<\/span>.*/\1/p') \
 || user_agent=
 [ -z "$user_agent" ] && {
@@ -63,8 +70,12 @@ dl_gh() {
             url=$(echo $line | cut -d '"' -f 4)
             if [[ $url != *.asc ]]; then
               name=$(basename "$url")
-              wget -q -O "$name" "$url"
-              green_log "[+] Downloading $name from $owner"
+              if [ -s "$name" ]; then
+                green_log "[+] Cached $name from $owner"
+              else
+                wget -q -O "$name" "$url"
+                green_log "[+] Downloading $name from $owner"
+              fi
             fi
           fi
         fi
@@ -86,8 +97,12 @@ dl_gh() {
             if [[ "$3" == "latest" && "$names" == *dev* ]]; then
               continue
             fi
-            green_log "[+] Downloading $names from $2"
-            wget -q -O "$names" $url
+            if [ -s "$names" ]; then
+              green_log "[+] Cached $names from $2"
+            else
+              green_log "[+] Downloading $names from $2"
+              wget -q -O "$names" $url
+            fi
           fi
         done
     done
@@ -150,6 +165,10 @@ _req() {
     if [ "$2" = "-" ]; then
         wget -nv -O "$2" --header="User-Agent: $user_agent" --header="Content-Type: application/octet-stream" --header="Accept-Language: en-US,en;q=0.9" --header="Connection: keep-alive" --header="Upgrade-Insecure-Requests: 1" --header="Cache-Control: max-age=0" --header="Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8" --keep-session-cookies --timeout=30 "$1" || rm -f "$2"
     else
+        if [ -s "./download/$2" ]; then
+            green_log "[+] Cached $2"
+            return 0
+        fi
         wget -nv -O "./download/$2" --header="User-Agent: $user_agent" --header="Content-Type: application/octet-stream" --header="Accept-Language: en-US,en;q=0.9" --header="Connection: keep-alive" --header="Upgrade-Insecure-Requests: 1" --header="Cache-Control: max-age=0" --header="Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8" --keep-session-cookies --timeout=30 "$1" || rm -f "./download/$2"
     fi
 }
