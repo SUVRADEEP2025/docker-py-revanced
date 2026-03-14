@@ -1,5 +1,8 @@
 name: MicroG Update
-permissions: write-all
+
+permissions:
+  contents: read
+
 on:
   workflow_dispatch:
   schedule:
@@ -8,13 +11,24 @@ on:
 jobs:
   check-update:
     runs-on: ubuntu-latest
+
     env:
-      repository: ${{ github.repository }}
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
-      - run: gh release download --repo MorpheApp/MicroG-RE --pattern "*.apk"
-      - run: mv *.apk 1microg.apk
-      - uses: actions/upload-artifact@main
+      - name: Download latest MicroG APK
+        run: |
+          gh release download \
+            --repo MorpheApp/MicroG-RE \
+            --pattern "*.apk"
+
+      - name: Rename APK
+        run: |
+          file=$(ls *.apk | head -n 1)
+          mv "$file" 1microg.apk
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
           name: microg
           path: 1microg.apk
