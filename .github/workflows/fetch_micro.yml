@@ -11,7 +11,7 @@ jobs:
     steps:
       - run: gh release download --repo MorpheApp/MicroG-RE --pattern "*.apk"
       - run: mv *.apk 1microg.apk
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@main
         with:
           name: microg
           path: 1microg.apk
@@ -20,7 +20,7 @@ jobs:
     needs: check-update
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@main
         with:
           name: microg
       - uses: ./.github/actions/release
