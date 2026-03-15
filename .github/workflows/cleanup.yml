@@ -22,7 +22,7 @@ jobs:
     # name: Clean up old releases
     # 
     # steps:
-      # - uses: actions/checkout@v4
+      # - uses: actions/checkout@v5
       # - uses: Nats-ji/delete-old-releases@latest
         # with:
           # token: ${{ secrets.GITHUB_TOKEN }}
