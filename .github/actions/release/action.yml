@@ -15,21 +15,4 @@ runs:
         [Revanced Extended anddea](https://github.com/anddea/revanced-patches/releases)
         [Twitter Piko](https://github.com/crimera/piko/releases)
         "> ${{ github.workspace }}-CHANGELOG.txt
-    - name: Download latest MicroG APK
-      shell: bash
-      run: |
-          gh release download \
-            --repo MorpheApp/MicroG-RE \
-            --pattern "*.apk" && \
-             mv "$(ls *.apk | head -n 1)" 1microg.apk
 
-
-    - name: Release
-      uses: ncipollo/release-action@v1.14.0
-      with:
-        artifacts: |
-          ./release/*.apk
-        name: Revanced & Revanced Extended
-        tag: all
-        bodyFile: ${{ github.workspace }}-CHANGELOG.txt
-        allowUpdates: true

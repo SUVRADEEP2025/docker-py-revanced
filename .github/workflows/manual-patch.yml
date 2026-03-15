@@ -72,7 +72,7 @@ jobs:
         run: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@latest
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Check github connection
@@ -96,12 +96,17 @@ jobs:
         run: [1, 2, 3]
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@latest
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Check github connection
         id: check-gh-morphe
         run: bash src/etc/connection.sh
+      - name: Microg
+        run: |
+            mkdir -p download 
+            gh release download --repo MorpheApp/MicroG-RE --pattern "*.apk" --dir download
+            mv download/*.apk release/1microg.apk
       - name: Patch apk
         id: patch-morphe
         if: steps.check-gh-morphe.outputs.internet_error == '0'
@@ -158,7 +163,7 @@ jobs:
         if: steps.check-gh-rve-anddea-stable.outputs.internet_error == '0'
         run: bash src/build/Anddea-Revanced-Extended.sh
       - name: Cache
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@latest
         with:
           name: Cache_anddea_stable
           path: |
@@ -169,9 +174,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@latest
       - name: Cache
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@latest
         with:
           name: Cache_anddea_stable
           path: ./release
@@ -187,7 +192,7 @@ jobs:
         run: [1, 2]
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@latest
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Check github connection
@@ -211,7 +216,7 @@ jobs:
       options: --user root
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@latest
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Install library
@@ -226,7 +231,7 @@ jobs:
         if: steps.check-gh-rve.outputs.internet_error == '0'
         run: bash src/build/Revanced-Extended.sh
       - name: Cache
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@latest
         with:
           name: Cache_rve
           path: |
@@ -254,7 +259,7 @@ jobs:
       options: --user root
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@latest
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Install library
@@ -269,7 +274,7 @@ jobs:
         if: steps.check-gh-rve-beta.outputs.internet_error == '0'
         run: bash src/build/Revanced-Extended-Beta.sh
       - name: Cache
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@latest
         with:
           name: Cache_rve_beta
           path: |
@@ -294,7 +299,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@latest
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Check github connection
@@ -314,7 +319,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@latest
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Check github connection
@@ -334,7 +339,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@latest
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Check github connection
@@ -354,7 +359,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@latest
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Check github connection
@@ -374,7 +379,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@latest
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Check github connection
@@ -394,7 +399,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@latest
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Check github connection
@@ -414,7 +419,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@latest
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Check github connection
@@ -434,7 +439,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@latest
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Check github connection
@@ -454,7 +459,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@latest
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Check github connection

@@ -33,15 +33,15 @@ revanced_dl(){
 	revanced_dl
 	# Patch Messenger:
 	# Arm64-v8a
-	get_patches_key "messenger"
-	get_apkpure "com.facebook.orca" "messenger-arm64-v8a" "facebook-messenger/com.facebook.orca"
-	patch "messenger-arm64-v8a" "revanced"
-	# Patch Facebook:
-	# Arm64-v8a
-	get_patches_key "facebook"
-	url="https://d.apkpure.com/b/APK/com.facebook.katana?versionCode=457020014"
-	req "$url" "facebook-arm64-v8a.apk"
-	patch "facebook-arm64-v8a" "revanced"
+	# get_patches_key "messenger"
+	# get_apkpure "com.facebook.orca" "messenger-arm64-v8a" "facebook-messenger/com.facebook.orca"
+	# patch "messenger-arm64-v8a" "revanced"
+	# # Patch Facebook:
+	# # Arm64-v8a
+	# get_patches_key "facebook"
+	# url="https://d.apkpure.com/b/APK/com.facebook.katana?versionCode=457020014"
+	# req "$url" "facebook-arm64-v8a.apk"
+	# patch "facebook-arm64-v8a" "revanced"
 }
 3() {
 	dl_gh "revanced-cli" "revanced" "v5.0.1"
@@ -120,10 +120,10 @@ revanced_dl(){
 }
 7() {
 	revanced_dl
-	# # Patch RAR:
-	get_patches_key "rar"
-	get_apk "com.rarlab.rar" "rar" "rar" "rarlab-published-by-win-rar-gmbh/rar/rar" "Bundle"
-	patch "rar" "revanced"
+	# # # Patch RAR:
+	# get_patches_key "rar"
+	# get_apk "com.rarlab.rar" "rar" "rar" "rarlab-published-by-win-rar-gmbh/rar/rar" "Bundle"
+	# patch "rar" "revanced"
 	# # Patch Lightroom:
 	# get_patches_key "lightroom"
  	# url="https://adobe-lightroom-mobile.en.uptodown.com/android/download/1033600808" #Use uptodown because apkmirror always ask pass Cloudflare on this app
@@ -171,7 +171,7 @@ revanced_dl(){
 	# get_apk "com.duolingo" "duolingo" "duolingo-duolingo" "duolingo/duolingo-duolingo/duolingo-language-lessons" "Bundle"
 	# patch "duolingo" "revanced"
 	# Patch Google News Arm64-v8a
-	get_patches_key "GoogleNews"
+	get_patches_key "GoogleNews-revanced"
 	get_apk "com.google.android.apps.magazines" "googlenews" "google-news" "google-inc/google-news/google-news" "Bundle_extract"
 	split_editor "googlenews" "googlenews-arm64-v8a" "exclude" "split_config.armeabi_v7a split_config.x86 split_config.x86_64"
 	patch "googlenews-arm64-v8a" "revanced"
@@ -202,10 +202,10 @@ revanced_dl(){
 }
 13() {
 	revanced_dl
-	# Patch Threads
-	get_patches_key "Threads-revanced"
-	get_apkpure "com.instagram.barcelona" "threads-arm64-v8a" "threads/com.instagram.barcelona" "Bundle"
-	patch "threads-arm64-v8a" "revanced"
+	# # Patch Threads
+	# get_patches_key "Threads-revanced"
+	# get_apkpure "com.instagram.barcelona" "threads-arm64-v8a" "threads/com.instagram.barcelona" "Bundle"
+	# patch "threads-arm64-v8a" "revanced"
 	# Patch Prime Video
 	get_patches_key "Prime-Video-revanced"
 	version="3.0.412"
@@ -214,13 +214,13 @@ revanced_dl(){
 }
 14() {
 	revanced_dl
-	# Patch Crunchyroll
-	get_patches_key "Crunchyroll-revanced"
-	url="https://crunchyroll.en.uptodown.com/android/download/1133091557-x" #Use uptodown because apkmirror always ask pass Cloudflare on this app
-	url="https://dw.uptodown.com/dwn/$(req "$url" - | $pup -p --charset utf-8 'button#detail-download-button attr{data-url}')"
-	req "$url" "crunchyroll"
-	split_editor "crunchyroll" "crunchyroll"
-	patch "crunchyroll" "revanced"
+	# # Patch Crunchyroll
+	# get_patches_key "Crunchyroll-revanced"
+	# url="https://crunchyroll.en.uptodown.com/android/download/1133091557-x" #Use uptodown because apkmirror always ask pass Cloudflare on this app
+	# url="https://dw.uptodown.com/dwn/$(req "$url" - | $pup -p --charset utf-8 'button#detail-download-button attr{data-url}')"
+	# req "$url" "crunchyroll"
+	# split_editor "crunchyroll" "crunchyroll"
+	# patch "crunchyroll" "revanced"
 	# # Patch Viber
 	# get_patches_key "Viber-revanced"
 	# get_apk "com.viber.voip" "viber" "viber" "viber-media-s-a-r-l/viber/rakuten-viber-messenger"
@@ -237,18 +237,18 @@ revanced_dl(){
 	split_editor "reddit" "reddit-arm64-v8a" "exclude" "split_config.armeabi_v7a split_config.x86_64 split_config.mdpi split_config.ldpi split_config.hdpi split_config.xhdpi split_config.xxhdpi split_config.tvdpi"
 	get_patches_key "reddit"
 	patch "reddit-arm64-v8a" "revanced"
-	# Patch Disney+
-	get_patches_key "Disney"
-	version="4.20.2+rc1-2025.12.09"
-	get_apk "com.disney.disneyplus" "disney" "disney" "disney/disney/disney" "Bundle"
-	patch "disney" "revanced"
+	# # Patch Disney+
+	# get_patches_key "Disney"
+	# version="4.20.2+rc1-2025.12.09"
+	# get_apk "com.disney.disneyplus" "disney" "disney" "disney/disney/disney" "Bundle"
+	# patch "disney" "revanced"
 }
 16() {
 	revanced_dl
 	# Patch ProtonVPN
-	get_patches_key "ProtonVPN"
-	get_apk "ch.protonvpn.android" "protonvpn" "protonvpn-free-vpn-secure-unlimited-fdroid-version" "proton-technologies-ag/protonvpn-free-vpn-secure-unlimited-fdroid-version/protonvpn-fast-secure-vpn-f-droid-version"
-	patch "protonvpn" "revanced"
+	# get_patches_key "ProtonVPN"
+	# get_apk "ch.protonvpn.android" "protonvpn" "protonvpn-free-vpn-secure-unlimited-fdroid-version" "proton-technologies-ag/protonvpn-free-vpn-secure-unlimited-fdroid-version/protonvpn-fast-secure-vpn-f-droid-version"
+	# patch "protonvpn" "revanced"
 	# Patch MyFitnessPal
 	# get_patches_key "MyFitnessPal"
  	# url="https://calorie-counter-myfitnesspal.en.uptodown.com/android/download/1010004885" #Use uptodown because apkmirror always ask pass Cloudflare on this app

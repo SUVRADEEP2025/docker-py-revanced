@@ -7,20 +7,28 @@ on:
 jobs:
   clean:
     runs-on: ubuntu-latest
+    name: Clean up old artifacts
+    permissions:
+      actions: write-all
     steps:
       - name: cleanup
         uses: glassechidna/artifact-cleaner@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          minimumAge: 86400 # all artifacts at least one day old
-  # cleanup-releases:
-  #   runs-on: ubuntu-latest
-  #   name: Clean up old releases
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: Nats-ji/delete-old-releases@v1
-  #       with:
-  #         token: ${{ secrets.GITHUB_TOKEN }}
-  #         keep-count: 2
-  #         keep-old-minor-releases: False
-  #         keep-old-minor-releases-count: 1
+          minimumAge: 86400 
+
+
+          # cleanup-releases:
+    # runs-on: ubuntu-latest
+    # name: Clean up old releases
+    # 
+    # steps:
+      # - uses: actions/checkout@latest
+      # - uses: Nats-ji/delete-old-releases@latest
+        # with:
+          # token: ${{ secrets.GITHUB_TOKEN }}
+          # keep-count: 2
+          # keep-old-minor-releases: False
+          # keep-old-minor-releases-count: 1
+# 
