@@ -17,7 +17,7 @@ jobs:
       repository: ${{ github.repository }}
     steps:
       - name: Checkout
-        uses: actions/checkout@latest
+        uses: actions/checkout@6.0.2
       - name: Check github connection
         id: check-gh
         run: bash src/etc/connection.sh
@@ -84,7 +84,7 @@ jobs:
       
       - name: Re-run workflow if github connection not stable
         if: always() && steps.check-rv.outcome == 'skipped' && env.retry_count < env.max_retries
-        uses: actions/github-script@latest
+        uses: actions/github-script@v8
         with:
           script: |
             const maxRetries = ${{ env.max_retries }};
