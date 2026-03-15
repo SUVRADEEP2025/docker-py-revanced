@@ -48,7 +48,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Check github connection
@@ -125,7 +125,7 @@ jobs:
         run: [1, 2, 3]
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Check github connection
@@ -148,7 +148,7 @@ jobs:
       options: --user root
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Install library
@@ -174,7 +174,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
       - name: Cache
         uses: actions/download-artifact@v4
         with:
@@ -192,7 +192,7 @@ jobs:
         run: [1, 2]
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Check github connection
@@ -242,7 +242,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
       - name: Cache
         uses: actions/download-artifact@v4
         with:
@@ -259,7 +259,7 @@ jobs:
       options: --user root
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Install library
@@ -285,7 +285,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
       - name: Cache
         uses: actions/download-artifact@v4
         with:
@@ -299,7 +299,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Check github connection
@@ -319,7 +319,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Check github connection
@@ -339,7 +339,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Check github connection
@@ -359,7 +359,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Check github connection
@@ -379,7 +379,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Check github connection
@@ -399,7 +399,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Check github connection
@@ -419,7 +419,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Check github connection
@@ -439,7 +439,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Check github connection
@@ -459,7 +459,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
       - name: Preparing to patch
         uses: ./.github/actions/preparing
       - name: Check github connection
