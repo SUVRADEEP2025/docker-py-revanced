@@ -139,7 +139,7 @@ jobs:
     if: ${{ github.event.inputs.org == 'RVE-anddea-stable' || inputs.org == 'RVE-anddea-stable' }}
     runs-on: ubuntu-latest
     container:
-      image: ubuntu:20.04
+      image: debian:stable
       options: --user root
     steps:
       - name: Checkout
@@ -207,7 +207,7 @@ jobs:
     if: ${{ github.event.inputs.org == 'Revanced Extended' || inputs.org == 'Revanced Extended' }}
     runs-on: ubuntu-latest
     container:
-      image: ubuntu:20.04
+      image: debian:stable
       options: --user root
     steps:
       - name: Checkout
@@ -250,7 +250,7 @@ jobs:
     if: ${{ github.event.inputs.org == 'Revanced Extended Beta' || inputs.org == 'Revanced Extended Beta' }}
     runs-on: ubuntu-latest
     container:
-      image: ubuntu:20.04
+      image: debian:stable
       options: --user root
     steps:
       - name: Checkout

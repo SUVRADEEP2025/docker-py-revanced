@@ -40,6 +40,8 @@ anddea_dl(){
 2() {
 	# anddea_dl
 	# Patch YouTube Music Extended:
+	echo 'skip'
+	sleep 1
 	# Arm64-v8a
 	# Armeabi-v7a
 	# get_patches_key "youtube-music-rve-anddea"

@@ -17,8 +17,8 @@ jobs:
         with:
           token: ${{ github.token }}
           repository: ${{ github.repository }}
-          retain_days: 14
-          keep_minimum_runs: 3
+          retain_days: 5
+          keep_minimum_runs: 1
           # Optional: You can specify particular workflows by filename
           # delete_workflow_pattern: "build.yml, test.yml"
 
