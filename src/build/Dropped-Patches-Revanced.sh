@@ -2,6 +2,9 @@
 # Dropped Patches by indrastorms
 # source ./src/build/utils.sh
 
+echo "skipped Dropped-Patches-Revanced.sh"
+sleep 1
+
 # #################################################
 
 # # Download requirements

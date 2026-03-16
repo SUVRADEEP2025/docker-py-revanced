@@ -16,6 +16,46 @@ revanced_dl(){
 	get_patches_key "youtube-revanced" 
 	split_editor "youtube" "youtube-arm64-v8a" "exclude" "split_config.armeabi_v7a split_config.x86 split_config.x86_64"
 	patch "youtube-arm64-v8a" "revanced"
+
+	get_patches_key "GoogleNews-revanced"
+	get_apk "com.google.android.apps.magazines" "googlenews" "google-news" "google-inc/google-news/google-news" "Bundle_extract"
+	split_editor "googlenews" "googlenews-arm64-v8a" "exclude" "split_config.armeabi_v7a split_config.x86 split_config.x86_64"
+	patch "googlenews-arm64-v8a" "revanced"
+	dl_gh "revanced-cli" "revanced" "v5.0.1"
+	dl_gh "revanced-patches" "revanced" "v5.48.0" #https://github.com/ReVanced/revanced-patches/issues/6593
+	# Patch Google photos:
+	# Arm64-v8a
+	get_patches_key "gg-photos"
+	get_apk "com.google.android.apps.photos" "gg-photos-arm64-v8a" "photos" "google-inc/photos/google-photos" "arm64-v8a" "nodpi"
+	patch "gg-photos-arm64-v8a" "revanced"
+
+	get_apk "com.google.android.youtube" "youtube-lite" "youtube" "google-inc/youtube/youtube" "Bundle_extract"
+	# Patch YouTube Lite Arm64-v8a:
+	get_patches_key "youtube-revanced"
+	split_editor "youtube-lite" "youtube-lite-arm64-v8a" "include" "split_config.arm64_v8a split_config.en split_config.xxxhdpi"
+	patch "youtube-lite-arm64-v8a" "revanced"
+	get_patches_key "youtube-music-revanced"
+	get_apk "com.google.android.apps.youtube.music" "youtube-music-arm64-v8a" "youtube-music" "google-inc/youtube-music/youtube-music" "arm64-v8a"
+	patch "youtube-music-arm64-v8a" "revanced"
+	get_patches_key "Prime-Video-revanced"
+	version="3.0.412"
+	get_apk " com.amazon.avod.thirdpartyclient" "prime-video-arm64-v8a" "amazon-prime-video" "amazon-mobile-llc/amazon-prime-video/amazon-prime-video" "arm64-v8a"
+	patch "prime-video-arm64-v8a" "revanced"
+	# Patch Reddit
+	get_patches_key "reddit"
+	get_apk "com.reddit.frontpage" "reddit" "reddit" "redditinc/reddit/reddit" "Bundle_extract"
+	split_editor "reddit" "reddit"
+	patch "reddit" "revanced"
+	# Patch Arm64-v8a:
+	split_editor "reddit" "reddit-arm64-v8a" "exclude" "split_config.armeabi_v7a split_config.x86_64 split_config.mdpi split_config.ldpi split_config.hdpi split_config.xhdpi split_config.xxhdpi split_config.tvdpi"
+	get_patches_key "reddit"
+	patch "reddit-arm64-v8a" "revanced"
+
+	j="i"
+	get_patches_key "Spotjfy-revanced"
+	get_apkpure "com.spot"$j"fy.music" "spot"$j"fy-arm64-v8a" "spot"$j"fy-music-and-podcasts-for-android/com.spot"$j"fy.music"
+	patch "spotjfy-arm64-v8a" "revanced"
+
 	# # Patch Youtube Armeabi-v7a
 	# get_patches_key "youtube-revanced" 
 	# split_editor "youtube" "youtube-armeabi-v7a" "exclude" "split_config.arm64_v8a split_config.x86 split_config.x86_64"
@@ -30,7 +70,8 @@ revanced_dl(){
 	# patch "youtube-x86_64" "revanced"
 }
 2() {
-	revanced_dl
+	echo "skipped"
+	sleep 1
 	# Patch Messenger:
 	# Arm64-v8a
 	# get_patches_key "messenger"
@@ -42,15 +83,12 @@ revanced_dl(){
 	# url="https://d.apkpure.com/b/APK/com.facebook.katana?versionCode=457020014"
 	# req "$url" "facebook-arm64-v8a.apk"
 	# patch "facebook-arm64-v8a" "revanced"
+	# continue
 }
 3() {
-	dl_gh "revanced-cli" "revanced" "v5.0.1"
-	dl_gh "revanced-patches" "revanced" "v5.48.0" #https://github.com/ReVanced/revanced-patches/issues/6593
-	# Patch Google photos:
-	# Arm64-v8a
-	get_patches_key "gg-photos"
-	get_apk "com.google.android.apps.photos" "gg-photos-arm64-v8a" "photos" "google-inc/photos/google-photos" "arm64-v8a" "nodpi"
-	patch "gg-photos-arm64-v8a" "revanced"
+	echo "skipped"
+	sleep 1
+
 	# Armeabi-v7a
 	#get_patches_key "gg-photos"
  	#version="7.32.0.765953717"
@@ -68,7 +106,9 @@ revanced_dl(){
 	#patch "gg-photos-x86_64" "revanced"
 }
 4() {
-	revanced_dl
+	echo "skipped"
+	sleep 1
+	# revanced_dl
 	# # Patch Tiktok:
 	# get_patches_key "tiktok"
 	# url="https://tiktok.en.uptodown.com/android/download/1026195874-x" #Use uptodown because apkmirror ban tiktok in US lead github action can't download apk file
@@ -82,7 +122,9 @@ revanced_dl(){
 	# patch "instagram-arm64-v8a" "revanced"
 }
 5() {
-	revanced_dl
+	echo "skipped"
+	sleep 1
+	# revanced_dl
 	# Patch Pixiv:
 	# get_patches_key "pixiv"
 	# get_apkpure "jp.pxv.android" "pixiv" "pixiv/jp.pxv.android"
@@ -98,7 +140,9 @@ revanced_dl(){
 	# patch "twitch-arm64-v8a" "revanced"
 }
 6() {
-	revanced_dl
+	echo "skipped"
+	sleep 1
+	# revanced_dl
 	# Patch Tumblr:
 	# get_patches_key "tumblr"
 	# get_apk "com.tumblr" "tumblr" "tumblr" "tumblr-inc/tumblr/tumblr-social-media-art-blog" "Bundle_extract"
@@ -119,7 +163,9 @@ revanced_dl(){
 	# patch "soundcloud-arm64-v8a" "revanced"
 }
 7() {
-	revanced_dl
+	echo "skipped"
+	sleep 1
+	# revanced_dl
 	# # # Patch RAR:
 	# get_patches_key "rar"
 	# get_apk "com.rarlab.rar" "rar" "rar" "rarlab-published-by-win-rar-gmbh/rar/rar" "Bundle"
@@ -132,24 +178,21 @@ revanced_dl(){
 	# patch "lightroom" "revanced"
 }
 8() {
-	revanced_dl
-	get_apk "com.google.android.youtube" "youtube-lite" "youtube" "google-inc/youtube/youtube" "Bundle_extract"
-	# Patch YouTube Lite Arm64-v8a:
-	get_patches_key "youtube-revanced"
-	split_editor "youtube-lite" "youtube-lite-arm64-v8a" "include" "split_config.arm64_v8a split_config.en split_config.xxxhdpi"
-	patch "youtube-lite-arm64-v8a" "revanced"
+	# revanced_dl
+	echo "skipped"
+	sleep 1
 	# # Patch YouTube Lite Armeabi-v7a:
 	# get_patches_key "youtube-revanced"
 	# split_editor "youtube-lite" "youtube-lite-armeabi-v7a" "include" "split_config.armeabi_v7a split_config.en split_config.xxxhdpi"
 	# patch "youtube-lite-armeabi-v7a" "revanced"
 }
 9() {
-	revanced_dl
+	echo "skipped"
+	sleep 1
+	# revanced_dl
 	# Patch YouTube Music:
 	# Arm64-v8a
-	get_patches_key "youtube-music-revanced"
-	get_apk "com.google.android.apps.youtube.music" "youtube-music-arm64-v8a" "youtube-music" "google-inc/youtube-music/youtube-music" "arm64-v8a"
-	patch "youtube-music-arm64-v8a" "revanced"
+
 	# # Armeabi-v7a
 	# get_patches_key "youtube-music-revanced"
 	# get_apk "com.google.android.apps.youtube.music" "youtube-music-armeabi-v7a" "youtube-music" "google-inc/youtube-music/youtube-music" "armeabi-v7a"
@@ -164,20 +207,21 @@ revanced_dl(){
 	# patch "youtube-music-x86" "revanced"
 }
 10() {
-	revanced_dl
+	# revanced_dl
+	echo "skipped"
+	sleep 1
 	# Patch Duolingo
 	# get_patches_key "Duolingo"
 	# lock_version="1"
 	# get_apk "com.duolingo" "duolingo" "duolingo-duolingo" "duolingo/duolingo-duolingo/duolingo-language-lessons" "Bundle"
 	# patch "duolingo" "revanced"
 	# Patch Google News Arm64-v8a
-	get_patches_key "GoogleNews-revanced"
-	get_apk "com.google.android.apps.magazines" "googlenews" "google-news" "google-inc/google-news/google-news" "Bundle_extract"
-	split_editor "googlenews" "googlenews-arm64-v8a" "exclude" "split_config.armeabi_v7a split_config.x86 split_config.x86_64"
-	patch "googlenews-arm64-v8a" "revanced"
+
 }
 11() {
-	revanced_dl
+	# revanced_dl
+	echo "skipped"
+	sleep 1
 	# # Patch Photomath
 	# get_patches_key "Photomath"
 	# get_apk "com.microblink.photomath" "photomath" "photomath" "google-inc/photomath/photomath" "Bundle" "Bundle_extract"
@@ -189,31 +233,30 @@ revanced_dl(){
 	# patch "strava-arm64-v8a" "revanced"
 }
 12() {
-	revanced_dl
+	echo "skipped"
+	sleep 1
+	# revanced_dl
 	# Patch Spotjfy Arm64-v8a
-	# j="i"
-	# get_patches_key "Spotjfy-revanced"
-	# get_apkpure "com.spot"$j"fy.music" "spotjfy-arm64-v8a" "spot"$j"fy-music-and-podcasts-for-android/com.spot"$j"fy.music"
-	# patch "spotjfy-arm64-v8a" "revanced"
 	# Patch Proton mail
 	# get_patches_key "protonmail-revanced"
 	# get_apk "ch.protonmail.android" "protonmail" "protonmail-encrypted-email" "proton-technologies-ag/protonmail-encrypted-email/proton-mail-encrypted-email"
 	# patch "protonmail" "revanced"
 }
 13() {
-	revanced_dl
+	echo "skipped"
+	sleep 1
+	# revanced_dl
 	# # Patch Threads
 	# get_patches_key "Threads-revanced"
 	# get_apkpure "com.instagram.barcelona" "threads-arm64-v8a" "threads/com.instagram.barcelona" "Bundle"
 	# patch "threads-arm64-v8a" "revanced"
 	# Patch Prime Video
-	get_patches_key "Prime-Video-revanced"
-	version="3.0.412"
-	get_apk " com.amazon.avod.thirdpartyclient" "prime-video-arm64-v8a" "amazon-prime-video" "amazon-mobile-llc/amazon-prime-video/amazon-prime-video" "arm64-v8a"
-	patch "prime-video-arm64-v8a" "revanced"
+	
 }
 14() {
-	revanced_dl
+	echo "skipped"
+	sleep 1
+	# revanced_dl
 	# # Patch Crunchyroll
 	# get_patches_key "Crunchyroll-revanced"
 	# url="https://crunchyroll.en.uptodown.com/android/download/1133091557-x" #Use uptodown because apkmirror always ask pass Cloudflare on this app
@@ -227,16 +270,8 @@ revanced_dl(){
 	# patch "viber" "revanced"
 }
 15() {
-	revanced_dl
-	# Patch Reddit
-	get_patches_key "reddit"
-	get_apk "com.reddit.frontpage" "reddit" "reddit" "redditinc/reddit/reddit" "Bundle_extract"
-	split_editor "reddit" "reddit"
-	patch "reddit" "revanced"
-	# Patch Arm64-v8a:
-	split_editor "reddit" "reddit-arm64-v8a" "exclude" "split_config.armeabi_v7a split_config.x86_64 split_config.mdpi split_config.ldpi split_config.hdpi split_config.xhdpi split_config.xxhdpi split_config.tvdpi"
-	get_patches_key "reddit"
-	patch "reddit-arm64-v8a" "revanced"
+	echo "skipped"
+	sleep 1
 	# # Patch Disney+
 	# get_patches_key "Disney"
 	# version="4.20.2+rc1-2025.12.09"
@@ -244,7 +279,9 @@ revanced_dl(){
 	# patch "disney" "revanced"
 }
 16() {
-	revanced_dl
+	echo "skipped"
+	sleep 1
+	# revanced_dl
 	# Patch ProtonVPN
 	# get_patches_key "ProtonVPN"
 	# get_apk "ch.protonvpn.android" "protonvpn" "protonvpn-free-vpn-secure-unlimited-fdroid-version" "proton-technologies-ag/protonvpn-free-vpn-secure-unlimited-fdroid-version/protonvpn-fast-secure-vpn-f-droid-version"

@@ -1,4 +1,8 @@
-# #!/bin/bash
+#!/bin/bash
+
+
+echo "wtf uses this"
+sleep 1 
 # # scrazzz build
 # source ./src/build/utils.sh
 # #################################################

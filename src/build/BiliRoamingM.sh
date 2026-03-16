@@ -1,4 +1,8 @@
 #!/bin/bash
+
+echo "BiliRoamingM what is that?? "
+sleep 1
+
 # # BiliRoamingM build for chinese only
 # source ./src/build/utils.sh
 # #################################################

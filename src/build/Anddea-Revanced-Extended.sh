@@ -41,6 +41,15 @@ done
 get_patches_key "youtube-music-rve-anddea"
 get_apk "com.google.android.apps.youtube.music" "youtube-music-stable-arm64-v8a" "youtube-music" "google-inc/youtube-music/youtube-music" "arm64-v8a"
 patch "youtube-music-stable-arm64-v8a" "anddea" "inotia"
+get_patches_key "Spotjfy-anddea"
+j="i"
+get_apkpure "com.spot"$j"fy.music" "spot"$j"fy-arm64-v8a" "spot"$j"fy-music-and-podcasts-for-android/com.spot"$j"fy.music"
+patch "spotjfy-arm64-v8a" "anddea"
+
+
+
+
+
 # Armeabi-v7a
 # get_patches_key "youtube-music-rve-anddea"
 # get_apk "com.google.android.apps.youtube.music" "youtube-music-stable-armeabi-v7a" "youtube-music" "google-inc/youtube-music/youtube-music" "armeabi-v7a"
@@ -55,10 +64,7 @@ patch "youtube-music-stable-arm64-v8a" "anddea" "inotia"
 # patch "youtube-music-stable-x86" "anddea" "inotia"
 
 # Patch Spotjfy Arm64-v8a
-get_patches_key "Spotjfy-anddea"
-j="i"
-get_apkpure "com.spot"$j"fy.music" "spotjfy-arm64-v8a" "spot"$j"fy-music-and-podcasts-for-android/com.spot"$j"fy.music"
-patch "spotjfy-arm64-v8a" "anddea"
+
 
 # Patch YouTube Lite Arm64-v8a:
 # get_patches_key "youtube-rve-anddea"

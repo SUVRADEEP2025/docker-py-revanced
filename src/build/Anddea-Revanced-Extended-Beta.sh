@@ -21,6 +21,12 @@ anddea_dl(){
 	# Patch Youtube Arm64-v8a
 	get_patches_key "youtube-rve-anddea"
 	patch "youtube-beta-arm64-v8a" "anddea" "morphe"
+
+
+	get_patches_key "youtube-music-rve-anddea"
+	get_apk "com.google.android.apps.youtube.music" "youtube-music-beta-arm64-v8a" "youtube-music" "google-inc/youtube-music/youtube-music" "arm64-v8a"
+	patch "youtube-music-beta-arm64-v8a" "anddea" "morphe"
+
 	# Patch Youtube Armeabi-v7a
 	# get_patches_key "youtube-rve-anddea"
 	# patch "youtube-beta-armeabi-v7a" "anddea" "morphe"
@@ -32,12 +38,9 @@ anddea_dl(){
 	# patch "youtube-beta-x86_64" "anddea" "morphe"
 }
 2() {
-	anddea_dl
+	# anddea_dl
 	# Patch YouTube Music Extended:
 	# Arm64-v8a
-	get_patches_key "youtube-music-rve-anddea"
-	get_apk "com.google.android.apps.youtube.music" "youtube-music-beta-arm64-v8a" "youtube-music" "google-inc/youtube-music/youtube-music" "arm64-v8a"
-	patch "youtube-music-beta-arm64-v8a" "anddea" "morphe"
 	# Armeabi-v7a
 	# get_patches_key "youtube-music-rve-anddea"
 	# get_apk "com.google.android.apps.youtube.music" "youtube-music-beta-armeabi-v7a" "youtube-music" "google-inc/youtube-music/youtube-music" "armeabi-v7a"

@@ -102,11 +102,6 @@ jobs:
       - name: Check github connection
         id: check-gh-morphe
         run: bash src/etc/connection.sh
-      - name: Microg
-        run: |
-            mkdir -p download 
-            gh release download --repo MorpheApp/MicroG-RE --pattern "*.apk" --dir download
-            mv download/*.apk release/1microg.apk
       - name: Patch apk
         id: patch-morphe
         if: steps.check-gh-morphe.outputs.internet_error == '0'

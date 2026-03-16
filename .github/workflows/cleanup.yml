@@ -1,32 +1,52 @@
+name: Routine Cleanup
 
-name: clean artifacts
-permissions: write-all
 on:
-  workflow_dispatch:
+  workflow_dispatch: 
+    # Allows you to trigger the workflow manually from the GitHub UI
 
 jobs:
-  clean:
+  cleanup-workflow-history:
+    name: Clean Workflow Run History
     runs-on: ubuntu-latest
-    name: Clean up old artifacts
+    permissions:
+      actions: write # Required to delete workflow runs
+
     steps:
-      - name: cleanup
-        uses: glassechidna/artifact-cleaner@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Delete old workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
         with:
-          minimumAge: 86400 
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: 14
+          keep_minimum_runs: 3
+          # Optional: You can specify particular workflows by filename
+          # delete_workflow_pattern: "build.yml, test.yml"
 
+  other-cleanup-tasks:
+    name: Additional Cleanup
+    runs-on: ubuntu-latest
+    # Wait for the workflow history to clean up before running this (optional)
+    needs: cleanup-workflow-history 
+    permissions:
+      contents: write # Typically needed if you are deleting branches or files
+      packages: write # Needed if you are cleaning up GitHub Packages
 
-          # cleanup-releases:
-    # runs-on: ubuntu-latest
-    # name: Clean up old releases
-    # 
-    # steps:
-      # - uses: actions/checkout@v5
-      # - uses: Nats-ji/delete-old-releases@latest
-        # with:
-          # token: ${{ secrets.GITHUB_TOKEN }}
-          # keep-count: 2
-          # keep-old-minor-releases: False
-          # keep-old-minor-releases-count: 1
-# 
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Add your specific cleanup scripts here. 
+      # For example, clearing out GitHub Actions caches:
+      - name: Cleanup Actions Cache
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Fetching list of cache keys"
+          cacheKeysForPR=$(gh cache list --ref $GITHUB_REF --limit 100 --json id --jq '.[].id')
+          
+          # Iterate and delete caches (Requires actions: write permission)
+          for cacheKey in $cacheKeysForPR
+          do
+              gh cache delete $cacheKey || true
+              echo "Deleted cache: $cacheKey"
+          done

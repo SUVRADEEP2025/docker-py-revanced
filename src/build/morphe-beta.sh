@@ -20,6 +20,35 @@ morphe_dl(){
 	# Patch Youtube Arm64-v8a
 	get_patches_key "youtube-morphe"
 	patch "youtube-beta-arm64-v8a" "morphe" "morphe"
+	
+	
+	get_patches_key "youtube-morphe"
+	get_apk "com.google.android.youtube" "youtube" "youtube" "google-inc/youtube/youtube" "Bundle_extract"
+	split_editor "youtube" "youtube"
+	patch "youtube" "morphe" "morphe"
+	Patch Youtube Arm64-v8a
+
+
+	Patch YouTube Lite Arm64-v8a:
+	get_patches_key "youtube-morphe"
+	get_apk "com.google.android.youtube" "youtube-lite" "youtube" "google-inc/youtube/youtube" "Bundle_extract"
+	split_editor "youtube-lite" "youtube-lite-arm64-v8a" "include" "split_config.arm64_v8a split_config.en split_config.xxxhdpi"
+	patch "youtube-lite-arm64-v8a" "morphe" "morphe"
+	get_patches_key "reddit-morphe"
+	get_apk "com.reddit.frontpage" "reddit-beta" "reddit" "redditinc/reddit/reddit" "Bundle_extract"
+	split_editor "reddit-beta" "reddit"
+	patch "reddit-beta" "morphe" "morphe"
+	# Patch Arm64-v8a:
+	split_editor "reddit-beta" "reddit-arm64-v8a-beta" "exclude" "split_config.armeabi_v7a split_config.x86_64 split_config.mdpi split_config.ldpi split_config.hdpi split_config.xhdpi split_config.xxhdpi split_config.tvdpi"
+	get_patches_key "reddit-morphe"
+	patch "reddit-arm64-v8a-beta" "morphe" "morphe"
+
+	get_patches_key "youtube-music-morphe"
+	get_apk "com.google.android.apps.youtube.music" "youtube-music-beta-arm64-v8a" "youtube-music" "google-inc/youtube-music/youtube-music" "arm64-v8a"
+	patch "youtube-music-beta-arm64-v8a" "morphe" "morphe"
+
+
+
 	# Patch Youtube Armeabi-v7a
 	# get_patches_key "youtube-morphe"
 	# patch "youtube-beta-armeabi-v7a" "morphe" "morphe"
@@ -29,12 +58,6 @@ morphe_dl(){
 	# # Patch Youtube x86_64
 	# get_patches_key "youtube-morphe" 
 	# patch "youtube-beta-x86_64" "morphe" "morphe"
-	
-	get_patches_key "youtube-morphe"
-	get_apk "com.google.android.youtube" "youtube" "youtube" "google-inc/youtube/youtube" "Bundle_extract"
-	split_editor "youtube" "youtube"
-	patch "youtube" "morphe" "morphe"
-	Patch Youtube Arm64-v8a
 	# get_patches_key "youtube-morphe" 
 	# split_editor "youtube" "youtube-arm64-v8a" "exclude" "split_config.armeabi_v7a split_config.x86 split_config.x86_64"
 	# patch "youtube-arm64-v8a" "morphe" "morphe"
@@ -52,33 +75,19 @@ morphe_dl(){
 	#patch "youtube-x86_64" "morphe" "morphe"
 }
 2() {
-	morphe_dl
-	Patch YouTube Lite Arm64-v8a:
-	get_patches_key "youtube-morphe"
-	get_apk "com.google.android.youtube" "youtube-lite" "youtube" "google-inc/youtube/youtube" "Bundle_extract"
-	split_editor "youtube-lite" "youtube-lite-arm64-v8a" "include" "split_config.arm64_v8a split_config.en split_config.xxxhdpi"
-	patch "youtube-lite-arm64-v8a" "morphe" "morphe"
+	echo "skipped"
 	# Patch YouTube Lite Armeabi-v7a:
 	#get_patches_key "youtube-morphe"
 	#split_editor "youtube-lite" "youtube-lite-armeabi-v7a" "include" "split_config.armeabi_v7a split_config.en split_config.xxxhdpi"
 	#patch "youtube-lite-armeabi-v7a" "morphe" "morphe"
 	# Patch Reddit:
-	get_patches_key "reddit-morphe"
-	get_apk "com.reddit.frontpage" "reddit-beta" "reddit" "redditinc/reddit/reddit" "Bundle_extract"
-	split_editor "reddit-beta" "reddit"
-	patch "reddit-beta" "morphe" "morphe"
-	# Patch Arm64-v8a:
-	split_editor "reddit-beta" "reddit-arm64-v8a-beta" "exclude" "split_config.armeabi_v7a split_config.x86_64 split_config.mdpi split_config.ldpi split_config.hdpi split_config.xhdpi split_config.xxhdpi split_config.tvdpi"
-	get_patches_key "reddit-morphe"
-	patch "reddit-arm64-v8a-beta" "morphe" "morphe"
+	# morphe_dl
 }
 3() {
-	morphe_dl
+	# morphe_dl
+	echo "skipped"
 	# Patch YouTube Music:
 	# Arm64-v8a
-	get_patches_key "youtube-music-morphe"
-	get_apk "com.google.android.apps.youtube.music" "youtube-music-beta-arm64-v8a" "youtube-music" "google-inc/youtube-music/youtube-music" "arm64-v8a"
-	patch "youtube-music-beta-arm64-v8a" "morphe" "morphe"
 	# Armeabi-v7a
 	# get_patches_key "youtube-music-morphe"
 	# get_apk "com.google.android.apps.youtube.music" "youtube-music-beta-armeabi-v7a" "youtube-music" "google-inc/youtube-music/youtube-music" "armeabi-v7a"
