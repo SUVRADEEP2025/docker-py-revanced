@@ -1,52 +1,74 @@
 name: Routine Cleanup
 
 on:
-  workflow_dispatch: 
-    # Allows you to trigger the workflow manually from the GitHub UI
+  schedule:
+    - cron: '0 0 * * 0'  # Every Sunday at midnight UTC
+  workflow_dispatch:
+    inputs:
+      retain_days:
+        description: 'Days of workflow run history to keep'
+        required: false
+        default: '7'
+      keep_minimum_runs:
+        description: 'Minimum number of runs to keep regardless of age'
+        required: false
+        default: '1'
 
 jobs:
   cleanup-workflow-history:
     name: Clean Workflow Run History
     runs-on: ubuntu-latest
     permissions:
-      actions: write # Required to delete workflow runs
-
+      actions: write
     steps:
-      - name: Delete old workflow runs
+      - name: Delete old completed/failed workflow runs
         uses: Mattraks/delete-workflow-runs@v2
         with:
           token: ${{ github.token }}
           repository: ${{ github.repository }}
-          retain_days: 1
-          keep_minimum_runs: 1
-          # Optional: You can specify particular workflows by filename
-          # delete_workflow_pattern: "build.yml, test.yml"
+          retain_days: ${{ inputs.retain_days || '7' }}
+          keep_minimum_runs: ${{ inputs.keep_minimum_runs || '1' }}
+          # Targets only runs that have fully completed (success, failure,
+          # cancelled, skipped, timed_out) — in-progress and queued runs
+          # are left untouched
+          delete_workflow_by_state_pattern: "completed"
 
-  other-cleanup-tasks:
-    name: Additional Cleanup
+  cleanup-actions-cache:
+    name: Clean Actions Cache
     runs-on: ubuntu-latest
-    # Wait for the workflow history to clean up before running this (optional)
-    needs: cleanup-workflow-history 
     permissions:
-      contents: write # Typically needed if you are deleting branches or files
-      packages: write # Needed if you are cleaning up GitHub Packages
-
+      actions: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      # Add your specific cleanup scripts here. 
-      # For example, clearing out GitHub Actions caches:
-      - name: Cleanup Actions Cache
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Delete all Actions caches
         run: |
-          echo "Fetching list of cache keys"
-          cacheKeysForPR=$(gh cache list --ref $GITHUB_REF --limit 100 --json id --jq '.[].id')
-          
-          # Iterate and delete caches (Requires actions: write permission)
-          for cacheKey in $cacheKeysForPR
-          do
-              gh cache delete $cacheKey || true
-              echo "Deleted cache: $cacheKey"
+          echo "Fetching cache list (all refs)..."
+          failed=0
+
+          while true; do
+            ids=$(gh cache list \
+              --repo "$GITHUB_REPOSITORY" \
+              --limit 100 \
+              --json id \
+              --jq '.[].id')
+
+            [[ -z "$ids" ]] && break
+
+            for id in $ids; do
+              if gh cache delete "$id" --repo "$GITHUB_REPOSITORY"; then
+                echo "Deleted cache: $id"
+              else
+                echo "::warning::Failed to delete cache: $id"
+                failed=$((failed + 1))
+              fi
+            done
+
+            [[ $(echo "$ids" | wc -l) -lt 100 ]] && break
           done
+
+          if [[ $failed -gt 0 ]]; then
+            echo "::error::$failed cache(s) could not be deleted"
+            exit 1
+          fi
+          echo "Cache cleanup complete."

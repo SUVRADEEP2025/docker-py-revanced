@@ -17,7 +17,7 @@ jobs:
       repository: ${{ github.repository }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Check github connection
         id: check-gh
         run: bash src/etc/connection.sh
@@ -84,7 +84,7 @@ jobs:
       
       - name: Re-run workflow if github connection not stable
         if: always() && steps.check-rv.outcome == 'skipped' && env.retry_count < env.max_retries
-        uses: actions/github-script@v8
+        uses: actions/github-script@main
         with:
           script: |
             const maxRetries = ${{ env.max_retries }};
@@ -107,7 +107,6 @@ jobs:
           max_retries: 5
     outputs:
       check_rv: ${{ steps.check-rv.outputs.new_patch }}
-      # check_rv_beta: ${{ steps.check-rv-beta.outputs.new_patch }}
       check_morphe: ${{ steps.check-morphe.outputs.new_patch }}
       check_morphe_beta: ${{ steps.check-morphe-beta.outputs.new_patch }}
       check_rve_anddea_stable: ${{ steps.check-rve-anddea-stable.outputs.new_patch }}
@@ -121,7 +120,8 @@ jobs:
       check_rve67: ${{ steps.check-rve67.outputs.new_patch }}
       check_rve5: ${{ steps.check-rve5.outputs.new_patch }}
       check_BiliRoamingM: ${{ steps.check-BiliRoamingM.outputs.new_patch }}
-
+      check_rv_beta: ${{ steps.check-rv-beta.outputs.new_patch }}
+      
   Patch-Revanced:
     name: Patch Revanced Stable
     needs: check

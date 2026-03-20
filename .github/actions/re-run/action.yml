@@ -1,25 +1,53 @@
 name: Re-run workflow if github connection not stable
 description: "Re-runs the workflow if the GitHub connection is not stable"
+
+inputs:
+  max_retries:
+    description: "Maximum number of retry attempts"
+    required: true
+    default: "3"
+  retry_count:
+    description: "Current retry attempt count"
+    required: true
+    default: "0"
+  org:
+    description: "Organisation input passed through on retry"
+    required: false
+    default: ""
+  github-token:
+    description: "GitHub token with actions:write permission"
+    required: true
+    default: ${{ github.token }}
+
 runs:
   using: "composite"
   steps:
     - name: Re-run workflow if github connection not stable
-      uses: actions/github-script@v8
+      uses: actions/github-script@v7
       with:
+        github-token: ${{ inputs.github-token }}
         script: |
-          const maxRetries = ${{ env.max_retries }};
-          let retryCount = Number('${{ env.retry_count }}');
-          const orgInput = '${{ env.org_event_input }}' || '${{ env.org_input }}';
+          const maxRetries = parseInt('${{ inputs.max_retries }}', 10);
+          const retryCount = parseInt('${{ inputs.retry_count }}', 10);
+          const org        = '${{ inputs.org }}';
+
+          if (isNaN(maxRetries) || isNaN(retryCount)) {
+            core.setFailed(`Invalid retry values — max_retries: ${{ inputs.max_retries }}, retry_count: ${{ inputs.retry_count }}`);
+            return;
+          }
+
           if (retryCount < maxRetries) {
-            retryCount += 1;
+            core.info(`Retry ${retryCount + 1}/${maxRetries} — re-dispatching workflow`);
             await github.rest.actions.createWorkflowDispatch({
               owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: "manual-patch.yml",
-              ref: context.ref,
+              repo:  context.repo.repo,
+              workflow_id: 'manual-patch.yml',
+              ref:   context.ref,
               inputs: {
-                'retry_count': String(retryCount),
-                'org': orgInput
-              }
+                retry_count: String(retryCount + 1),
+                org,
+              },
             });
+          } else {
+            core.warning(`Max retries (${maxRetries}) reached — not re-dispatching`);
           }
