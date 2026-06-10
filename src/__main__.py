@@ -318,7 +318,7 @@ def run_build(app_name: str, source: str, arch: str = "universal") -> str:
 def main():
     app_name = getenv("APP_NAME")
     source = getenv("SOURCE")
-    requested_arch = (getenv("ARCH") or "").strip()
+    requested_arch = (getenv("ARCH") or "").strip().lower()
 
     if not app_name or not source:
         logging.error("APP_NAME and SOURCE environment variables must be set")
