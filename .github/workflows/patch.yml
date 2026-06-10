@@ -195,6 +195,7 @@ jobs:
         with:
           name: apk-${{ matrix.app_name }}-${{ matrix.source }}
           path: "*.apk"
+          if-no-files-found: error
 
       - name: Upload Build Records
         if: always()
@@ -324,16 +325,42 @@ jobs:
             : > current_assets.txt
           fi
 
+          : > replacement_prefixes.txt
           for apk in ./release-apks/*.apk; do
             [ -f "$apk" ] || continue
-            basename "$apk" >> current_assets.txt
+            filename=$(basename "$apk")
+            app_arch=$(printf '%s\n' "$filename" | sed -E 's/^(.+-(arm64-v8a|armeabi-v7a|x86_64|x86|universal))-.*$/\1/')
+            echo "$app_arch" >> replacement_prefixes.txt
+          done
+
+          : > release_assets_unsorted.txt
+          while read -r filename; do
+            [ -n "$filename" ] || continue
+            keep=true
+            if [[ "$filename" == *.apk ]]; then
+              while read -r prefix; do
+                [ -n "$prefix" ] || continue
+                if [[ "$filename" == "$prefix"-* ]]; then
+                  keep=false
+                  break
+                fi
+              done < replacement_prefixes.txt
+            fi
+            if [ "$keep" = "true" ]; then
+              echo "$filename" >> release_assets_unsorted.txt
+            fi
+          done < current_assets.txt
+
+          for apk in ./release-apks/*.apk; do
+            [ -f "$apk" ] || continue
+            basename "$apk" >> release_assets_unsorted.txt
           done
 
           if [ -f ./release-apks/manifest.json ]; then
-            echo "manifest.json" >> current_assets.txt
+            echo "manifest.json" >> release_assets_unsorted.txt
           fi
 
-          sort -u current_assets.txt > release_assets.txt
+          sort -u release_assets_unsorted.txt > release_assets.txt
 
           cat > release_notes.md << 'EOF'
           # Morphe APKs - Auto Built
@@ -397,17 +424,26 @@ jobs:
 
           if [ "${{ steps.check-release.outputs.release_exists }}" = "true" ]; then
             echo "⬆️ Uploading rebuilt assets in place and refreshing release metadata..."
-            
-            # Delete old APK versions that are being replaced
-            for apk in "${ASSETS[@]}"; do
-              if [[ "$apk" == *.apk ]]; then
-                filename=$(basename "$apk")
-                echo "🗑️ Deleting old version of $filename from latest release..."
-                gh release delete latest "$filename" --yes || true
-              fi
+
+            # Remove stale APKs for the same app/architecture before upload.
+            # gh release upload --clobber only replaces exact filenames, so an app
+            # version bump would otherwise leave the old APK published too.
+            gh release view latest --json assets --jq '.assets[].name' > existing_assets.txt
+            for apk in ./release-apks/*.apk; do
+              [ -f "$apk" ] || continue
+              filename=$(basename "$apk")
+              app_arch=$(printf '%s\n' "$filename" | sed -E 's/^(.+-(arm64-v8a|armeabi-v7a|x86_64|x86|universal))-.*$/\1/')
+
+              while read -r old_asset; do
+                [ -n "$old_asset" ] || continue
+                if [[ "$old_asset" == "$filename" || "$old_asset" == "$app_arch"-* ]]; then
+                  echo "🗑️ Removing stale release asset: $old_asset"
+                  gh release delete-asset latest "$old_asset" --yes || true
+                fi
+              done < existing_assets.txt
             done
-            
-            # Upload new APKs and manifest
+
+            # Upload new APKs and manifest.
             gh release upload latest "${ASSETS[@]}" --clobber
             gh release edit latest \
               --title "Morphe APKs - $(date +'%Y-%m-%d %H:%M')" \
