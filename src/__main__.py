@@ -318,6 +318,7 @@ def run_build(app_name: str, source: str, arch: str = "universal") -> str:
 def main():
     app_name = getenv("APP_NAME")
     source = getenv("SOURCE")
+    requested_arch = (getenv("ARCH") or "").strip().lower()
 
     if not app_name or not source:
         logging.error("APP_NAME and SOURCE environment variables must be set")
@@ -335,6 +336,14 @@ def main():
             if config["app_name"] == app_name and config["source"] == source:
                 arches = config["arches"]
                 break
+
+        if requested_arch:
+            if requested_arch not in arches:
+                logging.warning(
+                    "Requested ARCH=%s is not listed for %s/%s; building it anyway",
+                    requested_arch, app_name, source,
+                )
+            arches = [requested_arch]
         
         # Build for each architecture
         built_apks = []
@@ -349,13 +358,21 @@ def main():
         print(f"\n🎯 Built {len(built_apks)} APK(s) for {app_name}:")
         for apk in built_apks:
             print(f"  📱 {Path(apk).name}")
+
+        if not built_apks:
+            logging.error("No APKs were built for %s/%s", app_name, source)
+            exit(1)
         
     else:
-        # Fallback to single universal build
-        logging.warning("arch-config.json not found, building universal only")
-        apk_path = run_build(app_name, source, "universal")
+        # Fallback to single universal build, or the requested manual arch.
+        arch = requested_arch or "universal"
+        logging.warning("arch-config.json not found, building %s only", arch)
+        apk_path = run_build(app_name, source, arch)
         if apk_path:
             print(f"🎯 Final APK path: {apk_path}")
+        else:
+            logging.error("No APK was built for %s/%s", app_name, source)
+            exit(1)
 
 if __name__ == "__main__":
     main()
