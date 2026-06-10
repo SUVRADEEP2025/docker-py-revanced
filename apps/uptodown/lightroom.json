@@ -1,5 +1,1 @@
-{
-   "name":"adobe-lightroom-mobile",
-   "package":"com.adobe.lrmobile",
-   "version": ""
-}
+{"name":"lightroom","package":"com.adobe.lrmobile","version":""}
