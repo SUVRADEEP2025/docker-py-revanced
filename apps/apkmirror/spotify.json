@@ -1,9 +1,1 @@
-{
-	"org": "spotify-ltd",
-	"name": "spotify",
-	"type": "APK",
-	"arch": "universal",
-	"dpi": "nodpi",
-	"package": "com.spotify.music",
-	"version": ""
-}
+{"org":"spotify-ltd","name":"spotify","type":"APK","arch":"universal","dpi":"nodpi","package":"com.spotify.music","version":""}

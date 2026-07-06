@@ -1,9 +1,1 @@
-{
-	"org": "duolingo",
-	"name": "duolingo",
-	"type": "APK",
-	"arch": "universal",
-	"dpi": "nodpi",
-	"package": "com.duolingo",
-	"version": ""
-}
+{"org":"duolingo","name":"duolingo","type":"APK","arch":"universal","dpi":"nodpi","package":"com.duolingo","version":""}
