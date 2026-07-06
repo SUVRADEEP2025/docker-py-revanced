@@ -1,15 +1,15 @@
 [
-    {
-        "name": "revanced-patches"
-    },
-    {
-        "user": "revanced",
-        "repo": "revanced-cli",
-        "tag": "latest"
-    },
-    {
-        "user": "blazskufca",
-        "repo": "revanced-patch",
-        "tag": "latest"
-    }
+	{
+		"name": "revanced-patches"
+	},
+	{
+		"user": "revanced",
+		"repo": "revanced-cli",
+		"tag": "latest"
+	},
+	{
+		"user": "blazskufca",
+		"repo": "revanced-patch",
+		"tag": "latest"
+	}
 ]

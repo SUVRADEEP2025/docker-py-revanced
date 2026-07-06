@@ -1,1 +1,9 @@
-{"org":"twitch-interactive","name":"twitch","type":"APK","arch":"universal","dpi":"nodpi","package":"tv.twitch.android.app","version":""}
+{
+	"org": "twitch-interactive",
+	"name": "twitch",
+	"type": "APK",
+	"arch": "universal",
+	"dpi": "nodpi",
+	"package": "tv.twitch.android.app",
+	"version": ""
+}

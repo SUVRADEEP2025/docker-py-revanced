@@ -1,5 +1,5 @@
 {
-    "name": "google-photos",
-    "package": "com.google.android.apps.photos",
-    "version": ""
+	"name": "google-photos",
+	"package": "com.google.android.apps.photos",
+	"version": ""
 }

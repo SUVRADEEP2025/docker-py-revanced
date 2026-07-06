@@ -1,5 +1,5 @@
 {
-    "name": "kakaotalk-messenger",
-    "package" : "com.kakao.talk",
-    "version" : ""
+	"name": "kakaotalk-messenger",
+	"package": "com.kakao.talk",
+	"version": ""
 }

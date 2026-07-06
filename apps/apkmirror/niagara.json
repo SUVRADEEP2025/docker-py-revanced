@@ -1,9 +1,9 @@
 {
-    "org": "mellowdrop-studio",
-    "name": "niagara-launcher-🔹-fresh-clean",
-    "type": "APK", 
-    "arch": "universal",
-    "dpi": "nodpi",
-    "package" : "bitpit.launcher",
-    "version" : ""
+	"org": "mellowdrop-studio",
+	"name": "niagara-launcher-🔹-fresh-clean",
+	"type": "APK",
+	"arch": "universal",
+	"dpi": "nodpi",
+	"package": "bitpit.launcher",
+	"version": ""
 }

@@ -1,6 +1,5 @@
 name: Auto Build and Release Morphe
 
-
 on:
   workflow_dispatch:
     inputs:
@@ -10,7 +9,7 @@ on:
         required: false
         default: false
   schedule:
-    - cron: '0 6 * * *'  # Daily at 6 AM UTC
+    - cron: "0 6 * * *"
 
 jobs:
   download-tools:
@@ -22,29 +21,24 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@main
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Setup Python
-        uses: actions/setup-python@main
-        with:
-          python-version: 3.11
-      
+          token: ${{ github.token }}
+
       - name: Download Morphe Tools
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           mkdir -p tools
           curl -L "https://github.com/revanced/revanced-cli/releases/latest/download/revanced-cli-all.jar" -o tools/revanced-cli.jar
           curl -L "https://github.com/revanced/revanced-patches/releases/latest/download/patches.jar" -o tools/patches.jar
           curl -L "https://github.com/revanced/revanced-integrations/releases/latest/download/app-release-unsigned.apk" -o tools/integrations.apk
-      
+
       - name: Cache Tools
         uses: actions/cache@main
         id: cache-tools
         with:
           path: tools/
           key: revanced-tools-${{ hashFiles('patch-config.json', 'arch-config.json') }}
-      
+
       - name: Generate Cache Key
         id: cache-key
         run: echo "cache-key=${{ steps.cache-tools.outputs.cache-key || 'no-cache' }}" >> $GITHUB_OUTPUT
@@ -65,31 +59,30 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@main
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
       - name: Setup Python
-        uses: actions/setup-python@main
-        with:
-          python-version: '3.11'
+        run: uv python install 3.11
 
       - name: Validate GitHub Auth
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
-          python scripts/validate_github_auth.py
+          uv run python scripts/validate_github_auth.py
 
       - name: Install Dependencies
-        run: |
-          pip install -r requirements.txt
-          pip install requests beautifulsoup4
+        run: uv sync
 
       - name: Run Incremental Update Check
         id: check
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
           FORCE_FULL_REBUILD: ${{ inputs.force_full_rebuild || 'false' }}
         run: |
-          python scripts/check_app_updates.py
+          uv run python scripts/check_app_updates.py
 
       - name: Show Plan Summary
         run: |
@@ -99,7 +92,7 @@ jobs:
           echo "Incremental:     ${{ steps.check.outputs.incremental }}"
 
       - name: Upload Plan Artifacts
-        uses: actions/upload-artifact@main  
+        uses: actions/upload-artifact@main
         with:
           name: build-plan
           path: |
@@ -142,7 +135,7 @@ jobs:
       fail-fast: false
       matrix:
         include: ${{ fromJson(needs.patch-apps.outputs.matrix) }}
-    
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@main
@@ -153,15 +146,14 @@ jobs:
           path: tools/
           key: revanced-tools-${{ hashFiles('patch-config.json', 'arch-config.json') }}
 
-      - name: Install Python
-        uses: actions/setup-python@main
-        with:
-          python-version: 3.11
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Setup Python
+        run: uv python install
 
       - name: Install Dependencies
-        run: |
-          pip install -r requirements.txt
-          pip install requests beautifulsoup4
+        run: uv sync
 
       - name: Build APK
         env:
@@ -171,8 +163,8 @@ jobs:
         run: |
           echo "Building ${{ matrix.app_name }} with ${{ matrix.source }}..."
           sleep $((RANDOM % 30)).$((RANDOM % 100))
-          
-          python -m src
+
+          uv run python -m src
 
       - name: Record Build Outputs
         if: always()
@@ -191,7 +183,7 @@ jobs:
           ls -la build_records/ 2>/dev/null || echo "(no records)"
 
       - name: Upload APK Artifact
-        uses: actions/upload-artifact@main  
+        uses: actions/upload-artifact@main
         with:
           name: apk-${{ matrix.app_name }}-${{ matrix.source }}
           path: "*.apk"
@@ -250,7 +242,7 @@ jobs:
             echo "✅ $built_count rebuilt APK(s) ready for release"
             echo "skip_release=false" >> $GITHUB_OUTPUT
           fi
-      
+
       - name: Collect All APKs
         if: steps.check-apks.outputs.skip_release == 'false'
         run: |
@@ -264,25 +256,32 @@ jobs:
           final_count=$(ls -1 ./release-apks/*.apk 2>/dev/null | wc -l || echo "0")
           echo "📊 Total APKs: $final_count"
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Setup Python
+        run: uv python install
+
+      - name: Install Dependencies
+        run: uv sync
+
       - name: Build Final Manifest
         if: steps.check-apks.outputs.skip_release == 'false'
         run: |
-          echo "🧾 Building manifest.json from build-plan + build records..."
-          # The new_manifest.json (post-plan baseline) lives in the build-plan artifact
+          echo "Building manifest.json from build-plan + build records..."
           if [ -f ./build-plan/new_manifest.json ]; then
             cp ./build-plan/new_manifest.json ./new_manifest.json
           fi
-          # Flatten all per-build records into one directory
           mkdir -p build_records
           if [ -d ./all-records ]; then
             find ./all-records -name "*.json" -exec cp {} build_records/ \; 2>/dev/null || true
           fi
-          python scripts/merge_manifest.py || {
-            echo "⚠️ merge_manifest.py failed; continuing without manifest update."
+          uv run python scripts/merge_manifest.py || {
+            echo "merge_manifest.py failed; continuing without manifest update."
             rm -f manifest.json
           }
           if [ -f manifest.json ]; then
-            echo "✅ manifest.json built:"
+            echo "manifest.json built:"
             jq '.entries | length' manifest.json || true
             cp manifest.json ./release-apks/manifest.json
           fi
@@ -293,7 +292,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python scripts/validate_github_auth.py
+          uv run python scripts/validate_github_auth.py
 
       - name: Check Existing Release
         if: steps.check-apks.outputs.skip_release == 'false'
@@ -309,7 +308,7 @@ jobs:
             echo "release_exists=false" >> "$GITHUB_OUTPUT"
             echo "📭 Release 'latest' does not exist; it will be created."
           fi
-      
+
       - name: Generate Release Notes
         if: steps.check-apks.outputs.skip_release == 'false'
         env:
@@ -337,9 +336,9 @@ jobs:
 
           cat > release_notes.md << 'EOF'
           # Morphe APKs - Auto Built
-          
+
           ## 📱 Available Apps
-          
+
           EOF
 
           while read -r filename; do
@@ -349,27 +348,27 @@ jobs:
 
           cat >> release_notes.md << 'EOF'
           ---
-          
+
           ## ⚙️ Build Information
           - **Auto-built daily at 6 AM UTC**
           - **Multiple architecture support** (arm64-v8a, armeabi-v7a, universal)
           - **Latest Morphe patches**
           - **Updated automatically**
-          
+
           ## 📊 Architecture Guide
           - **arm64-v8a**: Modern ARM devices (2014+)
           - **armeabi-v7a**: Older ARM devices
           - **universal**: All ARM devices (larger file)
-          
+
           ## ⚠️ Disclaimer
           These APKs are built automatically. Use at your own risk.
-          
+
           ## 🔄 Update Schedule
           - Automatic updates daily at 6 AM UTC
           - Manual updates available via workflow dispatch
           - Creates `latest` if missing and uploads rebuilt assets in place
           EOF
-      
+
       - name: Upload Or Create Release
         if: steps.check-apks.outputs.skip_release == 'false'
         env:
@@ -397,7 +396,7 @@ jobs:
 
           if [ "${{ steps.check-release.outputs.release_exists }}" = "true" ]; then
             echo "⬆️ Uploading rebuilt assets in place and refreshing release metadata..."
-            
+
             # Delete old APK versions that are being replaced
             for apk in "${ASSETS[@]}"; do
               if [[ "$apk" == *.apk ]]; then
@@ -406,7 +405,7 @@ jobs:
                 gh release delete latest "$filename" --yes || true
               fi
             done
-            
+
             # Upload new APKs and manifest
             gh release upload latest "${ASSETS[@]}" --clobber
             gh release edit latest \
@@ -422,7 +421,7 @@ jobs:
           fi
 
           echo "✅ Release publish step completed successfully!"
-      
+
       - name: Display Release URL
         if: steps.check-apks.outputs.skip_release == 'false'
         env:

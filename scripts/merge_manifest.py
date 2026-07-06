@@ -9,6 +9,7 @@ Inputs:
 Output:
   - manifest.json          (final manifest to attach to the release)
 """
+
 import json
 import sys
 from pathlib import Path

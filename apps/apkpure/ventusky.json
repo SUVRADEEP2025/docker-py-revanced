@@ -1,5 +1,5 @@
 {
-    "name": "ventusky-weather-radar",
-    "package" : "cz.ackee.ventusky",
-    "version" : ""
+	"name": "ventusky-weather-radar",
+	"package": "cz.ackee.ventusky",
+	"version": ""
 }

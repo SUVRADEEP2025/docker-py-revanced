@@ -1,1 +1,9 @@
-{"org":"strava","name":"strava","type":"APK","arch":"universal","dpi":"nodpi","package":"com.strava","version":""}
+{
+	"org": "strava",
+	"name": "strava",
+	"type": "APK",
+	"arch": "universal",
+	"dpi": "nodpi",
+	"package": "com.strava",
+	"version": ""
+}

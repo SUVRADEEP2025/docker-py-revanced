@@ -1,1 +1,5 @@
-{ "name": "ttmik-stories-korean", "package": "app.ttmikstories.android", "version": "" }
+{
+	"name": "ttmik-stories-korean",
+	"package": "app.ttmikstories.android",
+	"version": ""
+}

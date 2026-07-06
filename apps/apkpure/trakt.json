@@ -1,5 +1,5 @@
 {
-    "name": "trakt",
-    "package": "tv.trakt.trakt",
-    "version": ""
+	"name": "trakt",
+	"package": "tv.trakt.trakt",
+	"version": ""
 }

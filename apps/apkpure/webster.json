@@ -1,5 +1,5 @@
 {
-    "name": "dictionary-merriam-webster",
-    "package" : "com.merriamwebster",
-    "version" : ""
+	"name": "dictionary-merriam-webster",
+	"package": "com.merriamwebster",
+	"version": ""
 }

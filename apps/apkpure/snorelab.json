@@ -1,5 +1,5 @@
 {
-    "name": "snorelab-record-your-snoring",
-    "package" : "com.snorelab.app",
-    "version" : ""
+	"name": "snorelab-record-your-snoring",
+	"package": "com.snorelab.app",
+	"version": ""
 }

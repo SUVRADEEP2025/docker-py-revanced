@@ -1,5 +1,5 @@
 {
-    "name": "fing-network-tools",
-    "package" : "com.overlook.android.fing",
-    "version" : ""
+	"name": "fing-network-tools",
+	"package": "com.overlook.android.fing",
+	"version": ""
 }

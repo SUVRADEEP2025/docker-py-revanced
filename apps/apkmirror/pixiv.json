@@ -1,1 +1,9 @@
-{"org":"pixiv","name":"pixiv","type":"APK","arch":"universal","dpi":"nodpi","package":"jp.pxv.android","version":""}
+{
+	"org": "pixiv",
+	"name": "pixiv",
+	"type": "APK",
+	"arch": "universal",
+	"dpi": "nodpi",
+	"package": "jp.pxv.android",
+	"version": ""
+}

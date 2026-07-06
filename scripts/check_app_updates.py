@@ -22,6 +22,7 @@ old manifest is rebuilt automatically).
 Fail-safe: any unexpected error -> full rebuild matrix is emitted (preserves the
 previous always-build behavior so nothing breaks).
 """
+
 import os
 import sys
 import json
@@ -33,8 +34,8 @@ from typing import Dict, List, Tuple, Optional
 
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s [%(levelname)s] %(message)s',
-    datefmt='%H:%M:%S',
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%H:%M:%S",
 )
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -47,7 +48,12 @@ MANIFEST_NAME = "manifest.json"
 RELEASE_TAG = "latest"
 
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
-FORCE_FULL = os.environ.get("FORCE_FULL_REBUILD", "false").lower() in ("true", "1", "yes")
+FORCE_FULL = os.environ.get("FORCE_FULL_REBUILD", "false").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -74,7 +80,10 @@ def run_gh(args: List[str], timeout: int = 120) -> Tuple[int, str, str]:
     try:
         p = subprocess.run(
             ["gh", *args],
-            capture_output=True, text=True, env=env, timeout=timeout,
+            capture_output=True,
+            text=True,
+            env=env,
+            timeout=timeout,
         )
         return p.returncode, p.stdout, p.stderr
     except FileNotFoundError:
@@ -93,10 +102,7 @@ def load_arch_config() -> Dict[Tuple[str, str], List[str]]:
         return {}
     with ARCH_CONFIG.open("r", encoding="utf-8") as f:
         data = json.load(f)
-    return {
-        (e["app_name"], e["source"]): e.get("arches", ["universal"])
-        for e in data
-    }
+    return {(e["app_name"], e["source"]): e.get("arches", ["universal"]) for e in data}
 
 
 def load_app_config_version(app_name: str) -> str:
@@ -124,7 +130,9 @@ from src import utils as provider_utils
 _repo_sig_cache: Dict[Tuple[str, str, str, str], str] = {}
 
 
-def fetch_repo_signature(user: str, repo: str, tag: str, provider: str = "github") -> str:
+def fetch_repo_signature(
+    user: str, repo: str, tag: str, provider: str = "github"
+) -> str:
     """Get a stable identifier for the current state of a repo's release.
     Returns 'tag_name@published_at' on success, else a short error sentinel."""
     key = (user, repo, tag, provider)
@@ -207,6 +215,7 @@ def _fetch_github_signature(user: str, repo: str, tag: str) -> str:
 
 def _fetch_gitlab_signature(project: str, tag: str) -> str:
     from urllib.parse import quote
+
     encoded = quote(project, safe="")
     if tag == "latest":
         api = f"https://gitlab.com/api/v4/projects/{encoded}/releases/permalink/latest"
@@ -225,6 +234,7 @@ def _fetch_gitlab_signature(project: str, tag: str) -> str:
 
 def _fetch_codeberg_signature(user: str, repo: str, tag: str) -> str:
     from urllib.parse import quote
+
     base = f"https://codeberg.org/api/v1/repos/{user}/{repo}/releases"
     if tag == "latest":
         api = f"{base}/latest"
@@ -280,21 +290,27 @@ def get_source_signature(source: str) -> str:
                 continue
             provider = (entry.get("provider") or "github").lower().strip()
             tag = entry.get("tag", "latest")
-            
+
             if provider == "gitlab":
                 project = entry.get("project")
                 if project:
-                    parts.append(f"gitlab:{project}@{fetch_repo_signature('', project, tag, provider)}")
+                    parts.append(
+                        f"gitlab:{project}@{fetch_repo_signature('', project, tag, provider)}"
+                    )
             elif provider == "codeberg":
                 user = entry.get("user")
                 repo = entry.get("repo")
                 if user and repo:
-                    parts.append(f"codeberg:{user}/{repo}@{fetch_repo_signature(user, repo, tag, provider)}")
+                    parts.append(
+                        f"codeberg:{user}/{repo}@{fetch_repo_signature(user, repo, tag, provider)}"
+                    )
             else:
                 user = entry.get("user")
                 repo = entry.get("repo")
                 if user and repo:
-                    parts.append(f"{user}/{repo}@{fetch_repo_signature(user, repo, tag, provider)}")
+                    parts.append(
+                        f"{user}/{repo}@{fetch_repo_signature(user, repo, tag, provider)}"
+                    )
 
     sig = ";".join(parts) if parts else f"empty:{source}"
     _source_sig_cache[source] = sig
@@ -317,8 +333,9 @@ def _get_repo_owner_name() -> Optional[Tuple[str, str]]:
 
 
 def fetch_existing_manifest() -> Optional[dict]:
-    rc, _, err = run_gh(["release", "download", RELEASE_TAG,
-                         "--pattern", MANIFEST_NAME, "--clobber"])
+    rc, _, err = run_gh(
+        ["release", "download", RELEASE_TAG, "--pattern", MANIFEST_NAME, "--clobber"]
+    )
     if rc != 0:
         msg = err.strip()[:120]
         logging.info(f"No existing '{MANIFEST_NAME}' on '{RELEASE_TAG}' ({msg})")
@@ -420,13 +437,16 @@ def _recover_apk_from_release(app: str, arch: str, existing_apks: List[str]) -> 
     return candidates[-1] if candidates else ""
 
 
-
-
-def plan_incremental(full_matrix: List[dict], old_manifest: Optional[dict],
-                     existing_apks: List[str]) -> Tuple[List[dict], List[str], dict]:
+def plan_incremental(
+    full_matrix: List[dict], old_manifest: Optional[dict], existing_apks: List[str]
+) -> Tuple[List[dict], List[str], dict]:
     """Decide which entries need rebuilding.
     Returns (build_matrix, carry_over_apks, new_manifest_entries)."""
-    old_entries = (old_manifest or {}).get("entries", {}) if isinstance(old_manifest, dict) else {}
+    old_entries = (
+        (old_manifest or {}).get("entries", {})
+        if isinstance(old_manifest, dict)
+        else {}
+    )
     existing_apk_set = set(existing_apks)
 
     build_matrix: List[dict] = []
@@ -439,7 +459,7 @@ def plan_incremental(full_matrix: List[dict], old_manifest: Optional[dict],
         arch = entry["arch"]
         mkey = make_manifest_key(app, src, arch)
 
-        cur_app_ver = load_app_config_version(app)            # '' if 'latest'
+        cur_app_ver = load_app_config_version(app)  # '' if 'latest'
         cur_src_sig = get_source_signature(src)
         old = old_entries.get(mkey)
         old_src_sig = (old or {}).get("source_sig", "")
@@ -470,7 +490,9 @@ def plan_incremental(full_matrix: List[dict], old_manifest: Optional[dict],
             reasons.append("new-entry")
         else:
             if old.get("config_version", "") != cur_app_ver:
-                reasons.append(f"app-version: {old.get('config_version','')!r}->{cur_app_ver!r}")
+                reasons.append(
+                    f"app-version: {old.get('config_version', '')!r}->{cur_app_ver!r}"
+                )
             if old.get("source_sig", "") != cur_src_sig:
                 reasons.append("patch-source-updated")
             old_apk = carried_apk
@@ -540,7 +562,8 @@ def emit_full_rebuild(reason: str) -> None:
     # Empty manifest -> next run will treat everything as 'new-entry' until a
     # successful build writes a fresh manifest.
     Path("new_manifest.json").write_text(
-        json.dumps({"entries": {}}, indent=2), encoding="utf-8")
+        json.dumps({"entries": {}}, indent=2), encoding="utf-8"
+    )
     write_gh_output("build_matrix", json.dumps(full))
     write_gh_output("has_updates", "true" if full else "false")
     write_gh_output("update_count", str(len(full)))
@@ -570,12 +593,14 @@ def main() -> int:
             return 0
 
         build_mx, carry_over, new_entries = plan_incremental(
-            full, old_manifest, existing_apks)
+            full, old_manifest, existing_apks
+        )
 
         Path("build_matrix.json").write_text(json.dumps(build_mx), encoding="utf-8")
         Path("carry_over.json").write_text(json.dumps(carry_over), encoding="utf-8")
         Path("new_manifest.json").write_text(
-            json.dumps({"entries": new_entries}, indent=2), encoding="utf-8")
+            json.dumps({"entries": new_entries}, indent=2), encoding="utf-8"
+        )
 
         write_gh_output("build_matrix", json.dumps(build_mx))
         write_gh_output("has_updates", "true" if build_mx else "false")

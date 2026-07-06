@@ -1,5 +1,5 @@
 {
-    "name": "sofascore",
-    "package" : "com.sofascore.results",
-    "version" : ""
+	"name": "sofascore",
+	"package": "com.sofascore.results",
+	"version": ""
 }

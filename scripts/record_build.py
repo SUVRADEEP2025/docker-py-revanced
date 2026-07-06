@@ -8,6 +8,7 @@ the release job will merge into the final manifest.json.
 Output file: ./build_records/<app>__<source>__<arch>.json
 Content:    {"key": "app|source|arch", "apk": "<filename>"}
 """
+
 import os
 import sys
 import json
@@ -25,7 +26,7 @@ def detect_arch_from_filename(apk_name: str, default: str = "universal") -> str:
     if not apk_name:
         return default
     base = apk_name.lower()
-    
+
     # Check for specific arch tokens in the filename
     # Order matters: check more specific ones first
     if "arm64-v8a" in base:
@@ -38,7 +39,7 @@ def detect_arch_from_filename(apk_name: str, default: str = "universal") -> str:
         return "x86"
     if "universal" in base:
         return "universal"
-        
+
     return default
 
 

@@ -1,5 +1,5 @@
 {
-   "name":"kustom-widget",
-   "package":"org.kustom.widget",
-   "version": ""
+	"name": "kustom-widget",
+	"package": "org.kustom.widget",
+	"version": ""
 }

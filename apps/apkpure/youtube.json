@@ -1,5 +1,5 @@
 {
-    "name": "youtube",
-    "package" : "com.google.android.youtube",
-    "version" : ""
+	"name": "youtube",
+	"package": "com.google.android.youtube",
+	"version": ""
 }

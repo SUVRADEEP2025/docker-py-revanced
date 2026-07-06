@@ -1,1 +1,9 @@
-{"org":"amazon-com","name":"amazon-prime-video","type":"APK","arch":"universal","dpi":"nodpi","package":"com.amazon.avod.thirdpartyclient","version":""}
+{
+	"org": "amazon-com",
+	"name": "amazon-prime-video",
+	"type": "APK",
+	"arch": "universal",
+	"dpi": "nodpi",
+	"package": "com.amazon.avod.thirdpartyclient",
+	"version": ""
+}

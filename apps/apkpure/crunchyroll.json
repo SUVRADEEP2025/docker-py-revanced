@@ -1,5 +1,5 @@
 {
-    "name": "crunchyroll",
-    "package": "com.crunchyroll.crunchyroid",
-    "version": ""
+	"name": "crunchyroll",
+	"package": "com.crunchyroll.crunchyroid",
+	"version": ""
 }

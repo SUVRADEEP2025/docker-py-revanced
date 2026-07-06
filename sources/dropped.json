@@ -1,15 +1,15 @@
 [
-    {
-        "name": "dropped"
-    },
-    {
-        "user": "revanced",
-        "repo": "revanced-cli",
-        "tag": "latest"
-    },
-    {
-        "user": "indrastorms",
-        "repo": "Dropped-Patches",
-        "tag": "latest"
-    }
+	{
+		"name": "dropped"
+	},
+	{
+		"user": "revanced",
+		"repo": "revanced-cli",
+		"tag": "latest"
+	},
+	{
+		"user": "indrastorms",
+		"repo": "Dropped-Patches",
+		"tag": "latest"
+	}
 ]

@@ -1,1 +1,9 @@
-{"org":"adobe","name":"lightroom","type":"APK","arch":"universal","dpi":"nodpi","package":"com.adobe.lrmobile","version":""}
+{
+	"org": "adobe",
+	"name": "lightroom",
+	"type": "APK",
+	"arch": "universal",
+	"dpi": "nodpi",
+	"package": "com.adobe.lrmobile",
+	"version": ""
+}

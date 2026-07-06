@@ -194,6 +194,10 @@ cd morphe-nonroot
 
 2. **Install dependencies:**
 ```bash
+# Using uv (recommended)
+uv sync
+
+# Or using pip
 pip install -r requirements.txt
 pip install requests beautifulsoup4
 
@@ -202,6 +206,15 @@ pip install requests beautifulsoup4
 
 3. **Run the build:**
 You can build for a specific app and source.
+```bash
+# Using uv (recommended)
+export APP_NAME="youtube"
+export SOURCE="morphe"
+uv run python -m src
+
+```
+
+Or with pip:
 ```bash
 export APP_NAME="youtube"
 export SOURCE="morphe"
@@ -212,10 +225,11 @@ python -m src
 
 4. **Target specific architecture (Optional):**
 ```bash
+# Using uv (recommended)
 export APP_NAME="youtube"
 export SOURCE="morphe"
 export ARCH="arm64-v8a"  # Options: arm64-v8a, armeabi-v7a, universal
-python -m src
+uv run python -m src
 
 ```
 
@@ -273,4 +287,3 @@ Contributions to improve the toolchain or add support for new apps are welcome.
 **If you found this project helpful, please consider giving it a ⭐ Star.**  
 <br>
 **Made with 💜 by RookieZ**
-

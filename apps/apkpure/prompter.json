@@ -1,5 +1,5 @@
 {
-    "name": "teleprompter-vlog-scripts",
-    "package" : "com.solid.teleprompter",
-    "version" : ""
+	"name": "teleprompter-vlog-scripts",
+	"package": "com.solid.teleprompter",
+	"version": ""
 }

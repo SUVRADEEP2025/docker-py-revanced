@@ -1,5 +1,5 @@
 {
-    "name": "camscanner-pdf-creator",
-    "package" : "com.intsig.camscanner",
-    "version" : ""
+	"name": "camscanner-pdf-creator",
+	"package": "com.intsig.camscanner",
+	"version": ""
 }

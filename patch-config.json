@@ -1,12 +1,13 @@
 {
-  "patch_list": [
-    { "app_name": "youtube", "source": "morphe" },
-    { "app_name": "youtube-music", "source": "morphe" },
-    { "app_name": "reddit", "source": "morphe" },
-    { "app_name": "instagram", "source": "piko" },
-    { "app_name": "google-photos", "source": "rookie" },
-    { "app_name": "disney-plus", "source": "rookie" },
-    { "app_name": "prime-video", "source": "hoo" }
-    
-  ]
+	"patch_list": [
+		{ "app_name": "youtube", "source": "morphe" },
+		{ "app_name": "youtube-music", "source": "morphe" },
+		{ "app_name": "reddit", "source": "morphe" },
+		{ "app_name": "instagram", "source": "piko" },
+		{ "app_name": "google-photos", "source": "rookie" },
+		{ "app_name": "disney-plus", "source": "rookie" },
+		{ "app_name": "prime-video", "source": "hoo" },
+		{ "app_name": "google-photos", "source": "morphe" },
+		{ "app_name": "spotify", "source": "morphe" }
+	]
 }

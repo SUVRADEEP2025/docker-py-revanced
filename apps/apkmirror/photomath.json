@@ -1,1 +1,9 @@
-{"org":"photomath","name":"photomath","type":"APK","arch":"universal","dpi":"nodpi","package":"com.microblink.photomath","version":""}
+{
+	"org": "photomath",
+	"name": "photomath",
+	"type": "APK",
+	"arch": "universal",
+	"dpi": "nodpi",
+	"package": "com.microblink.photomath",
+	"version": ""
+}

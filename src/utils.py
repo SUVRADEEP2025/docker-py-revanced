@@ -1,18 +1,28 @@
 import json
+import logging
 import os
 import re
-import time
-import logging
-from typing import List, Optional
-from github.GithubException import BadCredentialsException
-from src import gh
-from sys import exit
 import subprocess
+import time
 from pathlib import Path
-from urllib.parse import urlparse, unquote, parse_qs, quote
-from src import session
+from sys import exit
+from typing import Iterator
+from urllib.parse import parse_qs, quote, unquote, urlparse
 
-def _parseparam(s):
+from bs4 import BeautifulSoup
+from github.GithubException import BadCredentialsException
+
+from src import gh, session
+
+
+def fetch_soup(url: str, headers: dict | None = None) -> BeautifulSoup:
+    """Fetch a URL and return parsed BeautifulSoup."""
+    response = session.get(url, headers=headers or {})
+    response.raise_for_status()
+    return BeautifulSoup(response.content, "html.parser")
+
+
+def _parseparam(s: str) -> Iterator[str]:
     while s[:1] == ";":
         s = s[1:]
         end = s.find(";")
@@ -25,7 +35,7 @@ def _parseparam(s):
         s = s[end:]
 
 
-def parse_header(line):
+def parse_header(line: str) -> tuple[str, dict[str, str]]:
     """Parse a Content-type like header.
     Return the main content-type and a dictionary of options.
     """
@@ -43,49 +53,57 @@ def parse_header(line):
             pdict[name] = value
     return key, pdict
 
-def find_file(files: list[Path], prefix: str = None, suffix: str = None, contains: str = None, exclude: list = None) -> Path | None:
+
+def find_file(
+    files: list[Path],
+    prefix: str = None,
+    suffix: str = None,
+    contains: str = None,
+    exclude: list = None,
+) -> Path | None:
     """Find a file with various matching criteria"""
     if exclude is None:
         exclude = []
-    
+
     for file in files:
         # Skip excluded patterns
         if any(excl.lower() in file.name.lower() for excl in exclude):
             continue
-            
+
         # Check all criteria
         matches = True
-        
+
         if prefix and not file.name.startswith(prefix):
             matches = False
-            
+
         if suffix and not file.name.endswith(suffix):
             matches = False
-            
+
         if contains and contains.lower() not in file.name.lower():
             matches = False
-            
+
         if matches:
             return file
-    
+
     # If not found with exclude, try without exclude (for fallback)
     if exclude:
         for file in files:
             matches = True
-            
+
             if prefix and not file.name.startswith(prefix):
                 matches = False
-                
+
             if suffix and not file.name.endswith(suffix):
                 matches = False
-                
+
             if contains and contains.lower() not in file.name.lower():
                 matches = False
-                
+
             if matches:
                 return file
-    
+
     return None
+
 
 def find_apksigner() -> str | None:
     sdk_root = Path("/usr/local/lib/android/sdk")
@@ -93,7 +111,7 @@ def find_apksigner() -> str | None:
 
     if not build_tools_dir.exists():
         logging.error(f"No build-tools found at: {build_tools_dir}")
-        return []
+        return None
 
     versions = sorted(build_tools_dir.iterdir(), reverse=True)
     for version_dir in versions:
@@ -104,28 +122,28 @@ def find_apksigner() -> str | None:
     logging.error("No apksigner found in build-tools")
     return None
 
+
 def run_process(
-    command: List[str],
-    cwd: Optional[Path] = None,
+    command: list[str],
+    cwd: Path | None = None,
     capture: bool = False,
     stream: bool = False,
     silent: bool = False,
     check: bool = True,
-    shell: bool = False
-) -> Optional[str]:
+    shell: bool = False,
+) -> str | None:
     process = subprocess.Popen(
         command,
         cwd=str(cwd) if cwd else None,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
-        shell=shell
+        shell=shell,
     )
 
     output_lines = []
-
     try:
-        for line in iter(process.stdout.readline, ''):
+        for line in iter(process.stdout.readline, ""):
             if line:
                 if not silent:
                     print(line.rstrip(), flush=True)
@@ -134,43 +152,40 @@ def run_process(
         process.stdout.close()
         return_code = process.wait()
 
-        output = ''.join(output_lines).strip() if capture else None
+        output = "".join(output_lines).strip() if capture else None
 
         if check and return_code != 0:
-            # Include captured output so callers can diagnose and optionally retry.
             raise subprocess.CalledProcessError(return_code, command, output=output)
 
         return output
+    except Exception:
+        process.stdout.close()
+        process.wait()
+        raise
 
-    except FileNotFoundError as e:
-        # Let callers handle this (e.g., fallback to another tool).
-        raise e
-    except Exception as e:
-        # Do not exit() here; callers (workflow) may want to retry with a different
-        # version/source or emit a clearer error message.
-        raise e
 
 def normalize_version(version: str) -> list[int]:
-    parts = version.split('.')
+    parts = version.split(".")
     normalized = []
     for part in parts:
-        match = re.match(r'(\d+)', part)
+        match = re.match(r"(\d+)", part)
         if match:
             normalized.append(int(match.group(1)))
         else:
             normalized.append(0)
-    
+
     # Include build number in comparison for versions like "6.6 build 002"
-    build_match = re.search(r'build\s+(\d+)', version, re.IGNORECASE)
+    build_match = re.search(r"build\s+(\d+)", version, re.IGNORECASE)
     if build_match:
         normalized.append(int(build_match.group(1)))
-    
+
     # Also check for parentheses format like "32.30.0(1575420)"
-    paren_match = re.search(r'\((\d+)\)$', version)
+    paren_match = re.search(r"\((\d+)\)$", version)
     if paren_match:
         normalized.append(int(paren_match.group(1)))
-    
+
     return normalized
+
 
 def get_highest_version(versions: list[str]) -> str | None:
     if not versions:
@@ -181,40 +196,36 @@ def get_highest_version(versions: list[str]) -> str | None:
             highest_version = v
     return highest_version
 
+
 def get_supported_versions(package_name: str, cli: str, patches: str) -> list[str]:
-    # Morphe CLI and ReVanced CLI have different list-versions syntax
     cli_name = Path(cli).name.lower()
-    is_morphe_cli = 'morphe' in cli_name
-    is_revanced_v6_or_newer = 'revanced-cli-6' in cli_name or 'revanced-cli-7' in cli_name or 'revanced-cli-8' in cli_name
+    is_morphe_cli = "morphe" in cli_name
 
     if is_morphe_cli:
-        # Morphe CLI docs officially describe `list-patches --with-packages --with-versions`
-        # (and the output tends to include more complete version information than
-        # `list-versions`, which may only show "most common" compatible versions).
-        #
-        # We still try `list-versions` first because it's lighter, but if it
-        # yields too little info we fall back to parsing `list-patches`.
         cmd = [
-            'java', '-jar', cli,
-            'list-versions',
-            '-f', package_name,
-            '--patches', patches
+            "java",
+            "-jar",
+            cli,
+            "list-versions",
+            "-f",
+            package_name,
+            "--patches",
+            patches,
         ]
-    elif is_revanced_v6_or_newer:
+    elif is_newer_revanced_cli(cli_name):
         cmd = [
-            'java', '-jar', cli,
-            'list-versions',
-            '-p', patches, '-b',
-            '-f', package_name
+            "java",
+            "-jar",
+            cli,
+            "list-versions",
+            "-p",
+            patches,
+            "-b",
+            "-f",
+            package_name,
         ]
     else:
-        # ReVanced CLI: pass patches as positional arg
-        cmd = [
-            'java', '-jar', cli,
-            'list-versions',
-            '-f', package_name,
-            patches
-        ]
+        cmd = ["java", "-jar", cli, "list-versions", "-f", package_name, patches]
 
     # We want the raw output even if the CLI returns a non-zero exit code (bad
     # args, missing patches, etc.) so we can decide what to do.
@@ -229,7 +240,11 @@ def get_supported_versions(package_name: str, cli: str, patches: str) -> list[st
 
     # Detect CLI error/usage output (wrong syntax, unrecognized args, etc.)
     first_line = lines[0].strip().lower()
-    if 'usage:' in first_line or 'unmatched argument' in first_line or 'error' in first_line:
+    if (
+        "usage:" in first_line
+        or "unmatched argument" in first_line
+        or "error" in first_line
+    ):
         logging.warning(f"CLI returned error/usage output, cannot determine version")
         return []
 
@@ -240,7 +255,7 @@ def get_supported_versions(package_name: str, cli: str, patches: str) -> list[st
     versions = []
     for line in lines[2:]:
         line = line.strip()
-        if line and 'Any' not in line:
+        if line and "Any" not in line:
             # Parse version - may include "build XXX" suffix
             # Format: "6.6 build 002" or "32.30.0(1575420)" or just "6.6"
             parts = line.split()
@@ -250,7 +265,7 @@ def get_supported_versions(package_name: str, cli: str, patches: str) -> list[st
                 if not version[0].isdigit():
                     continue
                 # Check if next parts are "build XXX"
-                if len(parts) >= 3 and parts[1].lower() == 'build':
+                if len(parts) >= 3 and parts[1].lower() == "build":
                     version = f"{parts[0]} build {parts[2]}"
                 versions.append(version)
 
@@ -259,7 +274,9 @@ def get_supported_versions(package_name: str, cli: str, patches: str) -> list[st
     if is_morphe_cli and len(versions) <= 1:
         try:
             alt_cmd = [
-                "java", "-jar", cli,
+                "java",
+                "-jar",
+                cli,
                 "list-patches",
                 "--with-packages",
                 "--with-versions",
@@ -288,30 +305,26 @@ def get_supported_versions(package_name: str, cli: str, patches: str) -> list[st
     return versions
 
 
-def get_supported_version(package_name: str, cli: str, patches: str) -> Optional[str]:
-    """Backwards compatible helper: returns the highest compatible version, if any."""
-    versions = get_supported_versions(package_name, cli, patches)
-    return versions[0] if versions else None
-
-def extract_filename(response, fallback_url=None) -> str:
-    cd = response.headers.get('content-disposition')
+def extract_filename(response, fallback_url: str | None = None) -> str:
+    cd = response.headers.get("content-disposition")
     if cd:
         _, params = parse_header(cd)
-        filename = params.get('filename') or params.get('filename*')
+        filename = params.get("filename") or params.get("filename*")
         if filename:
             return unquote(filename)
 
     parsed = urlparse(response.url)
     query_params = parse_qs(parsed.query)
-    rcd = query_params.get('response-content-disposition')
+    rcd = query_params.get("response-content-disposition")
     if rcd:
         _, params = parse_header(unquote(rcd[0]))
-        filename = params.get('filename') or params.get('filename*')
+        filename = params.get("filename") or params.get("filename*")
         if filename:
             return unquote(filename)
 
     path = urlparse(fallback_url or response.url).path
     return unquote(Path(path).name)
+
 
 def gh_api_request(endpoint: str) -> dict:
     """Make a GitHub API request using the 'gh' CLI as it handles tokens more robustly in Actions"""
@@ -319,14 +332,10 @@ def gh_api_request(endpoint: str) -> dict:
     # Ensure GH_TOKEN is set for the gh cli
     if "GITHUB_TOKEN" in env and "GH_TOKEN" not in env:
         env["GH_TOKEN"] = env["GITHUB_TOKEN"]
-        
+
     try:
         result = subprocess.run(
-            ["gh", "api", endpoint],
-            capture_output=True,
-            text=True,
-            env=env,
-            check=True
+            ["gh", "api", endpoint], capture_output=True, text=True, env=env, check=True
         )
         return json.loads(result.stdout)
     except Exception as e:
@@ -393,7 +402,9 @@ def detect_release(entry: dict) -> dict:
     provider = normalized["provider"]
 
     if provider == "github":
-        release = detect_github_release(normalized["user"], normalized["repo"], normalized["tag"])
+        release = detect_github_release(
+            normalized["user"], normalized["repo"], normalized["tag"]
+        )
         return normalize_release(
             release.get("tag_name"),
             release.get("published_at") or release.get("created_at"),
@@ -404,7 +415,9 @@ def detect_release(entry: dict) -> dict:
         return detect_gitlab_release(normalized["project"], normalized["tag"])
 
     if provider == "codeberg":
-        return detect_codeberg_release(normalized["user"], normalized["repo"], normalized["tag"])
+        return detect_codeberg_release(
+            normalized["user"], normalized["repo"], normalized["tag"]
+        )
 
     raise ValueError(f"Unsupported source provider: {provider}")
 
@@ -412,14 +425,18 @@ def detect_release(entry: dict) -> dict:
 def detect_gitlab_release(project: str, tag: str) -> dict:
     encoded = quote(project, safe="")
     if tag == "latest":
-        data = fetch_json(f"https://gitlab.com/api/v4/projects/{encoded}/releases/permalink/latest")
+        data = fetch_json(
+            f"https://gitlab.com/api/v4/projects/{encoded}/releases/permalink/latest"
+        )
     elif tag in ("", "dev", "prerelease"):
         releases = fetch_json(f"https://gitlab.com/api/v4/projects/{encoded}/releases")
         if not isinstance(releases, list) or not releases:
             raise ValueError(f"No releases found for GitLab project {project}")
         data = releases[0]
     else:
-        data = fetch_json(f"https://gitlab.com/api/v4/projects/{encoded}/releases/{quote(tag, safe='')}")
+        data = fetch_json(
+            f"https://gitlab.com/api/v4/projects/{encoded}/releases/{quote(tag, safe='')}"
+        )
 
     assets = (data.get("assets") or {}).get("links") or []
     return normalize_release(data.get("tag_name"), data.get("released_at"), assets)
@@ -437,7 +454,10 @@ def detect_codeberg_release(user: str, repo: str, tag: str) -> dict:
     else:
         data = fetch_json(f"{base}/tags/{quote(tag, safe='')}")
 
-    return normalize_release(data.get("tag_name"), data.get("published_at"), data.get("assets") or [])
+    return normalize_release(
+        data.get("tag_name"), data.get("published_at"), data.get("assets") or []
+    )
+
 
 def detect_github_release(user: str, repo: str, tag: str) -> dict:
     if tag == "latest":
@@ -455,8 +475,10 @@ def detect_github_release(user: str, repo: str, tag: str) -> dict:
         try:
             # Prefer 'gh' CLI as it handles tokens more robustly in Actions environment
             if attempt < 2:
-                logging.info(f"Fetching release {tag} for {user}/{repo} (attempt {attempt + 1})...")
-                
+                logging.info(
+                    f"Fetching release {tag} for {user}/{repo} (attempt {attempt + 1})..."
+                )
+
                 if tag == "latest":
                     data = gh_api_request(f"repos/{user}/{repo}/releases/latest")
                     return data
@@ -465,22 +487,22 @@ def detect_github_release(user: str, repo: str, tag: str) -> dict:
                     if not isinstance(data, list):
                         # Handle case where API might return a single object (unlikely for /releases)
                         data = [data]
-                        
+
                     if not data:
                         raise ValueError(f"No releases found for {user}/{repo}")
-                    
+
                     if tag == "":
-                        release = max(data, key=lambda x: x['created_at'])
+                        release = max(data, key=lambda x: x["created_at"])
                     elif tag == "dev":
-                        devs = [r for r in data if 'dev' in r['tag_name'].lower()]
+                        devs = [r for r in data if "dev" in r["tag_name"].lower()]
                         if not devs:
                             raise ValueError(f"No dev release found for {user}/{repo}")
-                        release = max(devs, key=lambda x: x['created_at'])
+                        release = max(devs, key=lambda x: x["created_at"])
                     else:
-                        pres = [r for r in data if r['prerelease']]
+                        pres = [r for r in data if r["prerelease"]]
                         if not pres:
                             raise ValueError(f"No prerelease found for {user}/{repo}")
-                        release = max(pres, key=lambda x: x['created_at'])
+                        release = max(pres, key=lambda x: x["created_at"])
                     return release
                 else:
                     data = gh_api_request(f"repos/{user}/{repo}/releases/tags/{tag}")
@@ -494,35 +516,106 @@ def detect_github_release(user: str, repo: str, tag: str) -> dict:
                     return release.raw_data
                 # ... other cases omitted for brevity as gh CLI is preferred ...
                 return repo_obj.get_release(tag).raw_data
-                    
+
         except Exception as e:
             if attempt < max_retries - 1:
                 wait_time = (attempt + 1) * 3
-                logging.warning(f"Attempt {attempt + 1} failed for {user}/{repo}: {e}. Retrying in {wait_time}s...")
+                logging.warning(
+                    f"Attempt {attempt + 1} failed for {user}/{repo}: {e}. Retrying in {wait_time}s..."
+                )
                 time.sleep(wait_time)
                 continue
-            
+
             # Special message for 401 on external repos
             err_msg = str(e).lower()
-            if "401" in err_msg or "unauthorized" in err_msg or "bad credentials" in err_msg:
-                is_external = user.lower() not in (os.environ.get("GITHUB_REPOSITORY", "").lower())
+            if (
+                "401" in err_msg
+                or "unauthorized" in err_msg
+                or "bad credentials" in err_msg
+            ):
+                is_external = user.lower() not in (
+                    os.environ.get("GITHUB_REPOSITORY", "").lower()
+                )
                 if is_external:
                     logging.error(
                         "❌ 401 Unauthorized for external repository %s/%s. "
                         "The default GITHUB_TOKEN in Actions cannot access private external repositories. "
                         "If this repo is private, please use a Personal Access Token (PAT) with 'repo' scope "
                         "stored as a secret (e.g., CUSTOM_GH_TOKEN) and update your workflow.",
-                        user, repo
+                        user,
+                        repo,
                     )
                 raise RuntimeError("Bad GitHub credentials for release lookup") from e
-            
-            logging.error(f"Error fetching release {tag} for {user}/{repo} after {max_retries} attempts: {e}")
+
+            logging.error(
+                f"Error fetching release {tag} for {user}/{repo} after {max_retries} attempts: {e}"
+            )
             raise
 
-def detect_source_type(cli_file: Path, patches_file: Path) -> str:
-    """Detect if we're using Morphe or ReVanced based on downloaded files"""
-    if cli_file and "morphe" in cli_file.name.lower() and patches_file and patches_file.suffix == ".mpp":
+
+def is_newer_revanced_cli(cli_name: str) -> bool:
+    """Check if the CLI is ReVanced v6 or newer."""
+    lower = cli_name.lower()
+    return (
+        "revanced-cli-6" in lower
+        or "revanced-cli-7" in lower
+        or "revanced-cli-8" in lower
+    )
+
+
+def detect_source_type(
+    download_files: list[Path] | None = None,
+    source: str = "",
+    cli_file: Path | None = None,
+    patches_file: Path | None = None,
+) -> str:
+    """Detect if we're using Morphe or ReVanced.
+
+    Can be called two ways:
+    1. With download_files + source (used during build to detect from downloaded artifacts)
+    2. With cli_file + patches_file (used for direct file-based detection)
+    """
+    if download_files is not None:
+        # Detection from downloaded files (replaces inline logic in __main__)
+        is_morphe = False
+        is_revanced = False
+
+        for file in download_files:
+            if "morphe-cli" in file.name.lower():
+                is_morphe = True
+                break
+            elif "revanced-cli" in file.name.lower():
+                is_revanced = True
+                break
+
+        if not is_morphe and not is_revanced:
+            for file in download_files:
+                if file.suffix == ".mpp":
+                    is_morphe = True
+                    break
+                elif file.suffix in [".rvp", ".jar"] and "patches" in file.name.lower():
+                    is_revanced = True
+                    break
+
+        if not is_morphe and not is_revanced:
+            is_morphe = "morphe" in source.lower() or "custom" in source.lower()
+            is_revanced = not is_morphe
+
+        return "morphe" if is_morphe else "revanced"
+
+    # Direct file-based detection
+    if (
+        cli_file
+        and "morphe" in cli_file.name.lower()
+        and patches_file
+        and patches_file.suffix == ".mpp"
+    ):
         return "morphe"
-    elif cli_file and "revanced" in cli_file.name.lower() and patches_file and patches_file.suffix in [".jar", ".rvp"]:
+    elif (
+        cli_file
+        and "revanced" in cli_file.name.lower()
+        and patches_file
+        and patches_file.suffix in [".jar", ".rvp"]
+    ):
         return "revanced"
     return "unknown"

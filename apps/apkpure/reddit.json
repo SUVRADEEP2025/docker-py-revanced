@@ -1,5 +1,5 @@
 {
-    "name": "reddit-apk",
-    "package" : "com.reddit.frontpage",
-    "version" : ""
+	"name": "reddit-apk",
+	"package": "com.reddit.frontpage",
+	"version": ""
 }

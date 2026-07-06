@@ -1,5 +1,5 @@
 {
-    "name": "starsense-explorer",
-    "package" : "com.celestron.skybox",
-    "version" : ""
+	"name": "starsense-explorer",
+	"package": "com.celestron.skybox",
+	"version": ""
 }
