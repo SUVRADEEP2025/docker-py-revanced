@@ -454,9 +454,10 @@ def detect_codeberg_release(user: str, repo: str, tag: str) -> dict:
     else:
         data = fetch_json(f"{base}/tags/{quote(tag, safe='')}")
 
-    return normalize_release(
-        data.get("tag_name"), data.get("published_at"), data.get("assets") or []
-    )
+    return normalize_release(f"""
+        {data.get("tag_name")},
+        {data.get("published_at")},
+        {data.get("assets")}""")
 
 
 def detect_github_release(user: str, repo: str, tag: str) -> dict:

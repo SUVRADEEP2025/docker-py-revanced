@@ -77,32 +77,40 @@ def _find_tool_files(
     return cli, patches
 
 
-def _merge_to_apk(input_apk: Path, app_name: str) -> Path:
-    """Merge non-APK bundles into .apk using APKEditor."""
+def _merge_to_apk(input_apk: Path, app_name: str) -> Path | None:
+    """Merge non-APK bundles into .apk using APKEditor. Returns None on failure."""
     logging.warning("Input file is not .apk, using APKEditor to merge")
-    apk_editor = downloader.download_apkeditor()
+    try:
+        apk_editor = downloader.download_apkeditor()
+    except Exception as e:
+        logging.error(f"Failed to download APKEditor: {e}")
+        return None
 
     merged_apk = input_apk.with_suffix(".apk")
 
-    utils.run_process(
-        [
-            "java",
-            "-jar",
-            apk_editor,
-            "m",
-            "-i",
-            str(input_apk),
-            "-o",
-            str(merged_apk),
-        ],
-        silent=True,
-    )
+    try:
+        utils.run_process(
+            [
+                "java",
+                "-jar",
+                apk_editor,
+                "m",
+                "-i",
+                str(input_apk),
+                "-o",
+                str(merged_apk),
+            ],
+            silent=True,
+        )
+    except subprocess.CalledProcessError as e:
+        logging.error(f"APKEditor merge failed: {e}")
+        return None
 
     input_apk.unlink(missing_ok=True)
 
     if not merged_apk.exists():
         logging.error("Merged APK file not found")
-        raise RuntimeError("Merged APK file not found")
+        return None
 
     # Clean up filename: remove build number like (1575420) and -1575420
     clean_name = re.sub(r"\(\d+\)", "", merged_apk.name)
@@ -138,7 +146,7 @@ def _repair_apk(input_apk: Path, app_name: str, version: str) -> Path:
     logging.info("Checking APK for corruption...")
     try:
         fixed_apk = Path(f"{app_name}-fixed-v{version}.apk")
-        result = subprocess.run(
+        subprocess.run(
             ["zip", "-FF", str(input_apk), "--out", str(fixed_apk)],
             check=False,
             capture_output=True,
@@ -166,35 +174,20 @@ def _run_patch(
     """Run the patching tool (Morphe or ReVanced)."""
     if is_morphe:
         logging.info("Using Morphe patching system...")
-        try:
-            morphe_cmd = [
-                "java",
-                "-jar",
-                str(cli),
-                "patch",
-                "--patches",
-                str(patches),
-                "--out",
-                str(output_apk),
-                str(input_apk),
-                *exclude_patches,
-                *include_patches,
-            ]
-            utils.run_process(morphe_cmd, capture=True, stream=True)
-        except subprocess.CalledProcessError:
-            logging.info("Trying alternative Morphe command format...")
-            morphe_cmd = [
-                "java",
-                "-jar",
-                str(cli),
-                "--patches",
-                str(patches),
-                "--input",
-                str(input_apk),
-                "--output",
-                str(output_apk),
-            ]
-            utils.run_process(morphe_cmd, capture=True, stream=True)
+        morphe_cmd = [
+            "java",
+            "-jar",
+            str(cli),
+            "patch",
+            "--patches",
+            str(patches),
+            "--out",
+            str(output_apk),
+            str(input_apk),
+            *exclude_patches,
+            *include_patches,
+        ]
+        utils.run_process(morphe_cmd, capture=True, stream=True)
     else:
         logging.info("Using ReVanced patching system...")
         if utils.is_newer_revanced_cli(Path(cli).name):
@@ -236,11 +229,12 @@ def _run_patch(
             )
 
 
-def _sign_apk(output_apk: Path, signed_apk: Path) -> None:
-    """Sign APK using apksigner."""
+def _sign_apk(output_apk: Path, signed_apk: Path) -> bool:
+    """Sign APK using apksigner. Returns True on success."""
     apksigner = utils.find_apksigner()
     if not apksigner:
-        raise RuntimeError("apksigner not found")
+        logging.error("apksigner not found")
+        return False
 
     try:
         utils.run_process(
@@ -264,10 +258,12 @@ def _sign_apk(output_apk: Path, signed_apk: Path) -> None:
             capture=True,
             stream=True,
         )
+        return True
     except Exception as e:
         logging.warning(f"Standard signing failed: {e}")
         logging.info("Trying alternative signing method...")
 
+    try:
         utils.run_process(
             [
                 str(apksigner),
@@ -291,6 +287,10 @@ def _sign_apk(output_apk: Path, signed_apk: Path) -> None:
             capture=True,
             stream=True,
         )
+        return True
+    except Exception as e:
+        logging.error(f"Alternative signing also failed: {e}")
+        return False
 
 
 def _load_patch_rules(app_name: str, source: str) -> tuple[list[str], list[str]]:
@@ -340,15 +340,30 @@ def run_build(app_name: str, source: str, arch: str = "universal") -> str | None
         downloader.download_aptoide,
     ]
 
+    # Add apkeep if available and enabled
+    if shutil.which("apkeep"):
+        download_methods.append(downloader.download_apkeep)
+
     input_apk = None
     version = None
     candidates: list[str] = []
     used_method = None
     for method in download_methods:
-        input_apk, version, candidates = method(app_name, str(cli), str(patches), arch)
-        if input_apk:
-            used_method = method
-            break
+        method_name = method.__name__.replace("download_", "")
+        try:
+            input_apk, version, candidates = method(
+                app_name, str(cli), str(patches), arch
+            )
+            if input_apk:
+                used_method = method
+                logging.info(
+                    f"Downloaded {app_name} v{version} from {method_name}"
+                )
+                break
+            else:
+                logging.debug(f"No APK available from {method_name} for {app_name}")
+        except Exception as e:
+            logging.warning(f"{method_name} failed for {app_name}: {e}")
 
     if input_apk is None or not used_method or not version:
         logging.error(f"Failed to download APK for {app_name}")
@@ -366,26 +381,40 @@ def run_build(app_name: str, source: str, arch: str = "universal") -> str | None
     for attempt_idx, ver in enumerate(versions_to_try):
         if attempt_idx > 0:
             logging.warning(
-                f"Retrying {app_name}/{source}/{arch} with older version {ver}..."
+                f"Retrying {app_name}/{source}/{arch} with version {ver} "
+                f"(attempt {attempt_idx + 1}/{len(versions_to_try)})..."
             )
             try:
                 input_apk.unlink(missing_ok=True)
             except Exception:
                 pass
 
-            input_apk, version, _ = used_method(
-                app_name, str(cli), str(patches), arch, override_version=ver
-            )
+            try:
+                input_apk, version, _ = used_method(
+                    app_name, str(cli), str(patches), arch, override_version=ver
+                )
+            except Exception as e:
+                logging.warning(f"Download failed for {app_name} v{ver}: {e}")
+                continue
+
             if input_apk is None:
+                logging.warning(f"No APK downloaded for {app_name} v{ver}")
                 continue
             version = ver
 
         # Merge non-APK bundles
         if input_apk.suffix != ".apk":
-            input_apk = _merge_to_apk(input_apk, app_name)
+            merged = _merge_to_apk(input_apk, app_name)
+            if merged is None:
+                logging.warning(f"Merge failed for {app_name} v{version}, skipping")
+                continue
+            input_apk = merged
 
         # Strip architecture-specific libs
-        _strip_arch_libs(input_apk, arch)
+        try:
+            _strip_arch_libs(input_apk, arch)
+        except Exception as e:
+            logging.warning(f"Arch strip failed for {app_name}: {e}")
 
         # Repair corrupted APK
         input_apk = _repair_apk(input_apk, app_name, version)
@@ -417,7 +446,10 @@ def run_build(app_name: str, source: str, arch: str = "universal") -> str | None
         input_apk.unlink(missing_ok=True)
         signed_apk = Path(f"{app_name}-{arch}-{name}-v{version}.apk")
 
-        _sign_apk(output_apk, signed_apk)
+        if not _sign_apk(output_apk, signed_apk):
+            logging.error(f"Signing failed for {app_name} v{version}")
+            output_apk.unlink(missing_ok=True)
+            continue
 
         output_apk.unlink(missing_ok=True)
         logging.info(f"APK built: {signed_apk.name}")
@@ -454,14 +486,20 @@ def main():
         built_apks = []
         for arch in arches:
             logging.info(f"Building {app_name} for {arch} architecture...")
-            apk_path = run_build(app_name, source, arch)
-            if apk_path:
-                built_apks.append(apk_path)
-                logging.info(f"Built {arch} version: {Path(apk_path).name}")
+            try:
+                apk_path = run_build(app_name, source, arch)
+                if apk_path:
+                    built_apks.append(apk_path)
+                    logging.info(f"Built {arch} version: {Path(apk_path).name}")
+            except Exception as e:
+                logging.error(f"Build failed for {app_name}/{arch}: {e}")
 
         logging.info(f"Built {len(built_apks)} APK(s) for {app_name}:")
         for apk in built_apks:
             logging.info(f"  {Path(apk).name}")
+
+        if not built_apks:
+            logging.error(f"All architectures failed for {app_name}")
 
     else:
         logging.warning("arch-config.json not found, building universal only")

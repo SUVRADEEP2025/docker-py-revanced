@@ -4,13 +4,14 @@ import tempfile
 import time
 from pathlib import Path
 
-from src import apkmirror, apkpure, aptoide, session, uptodown, utils
+from src import apkeep, apkmirror, apkpure, aptoide, session, uptodown, utils
 
 DOWNLOAD_TIMEOUT = 60
 MAX_RETRIES = 3
 RETRY_BACKOFF_BASE = 2
 
 PLATFORM_MODULES = {
+    "apkeep": apkeep,
     "apkmirror": apkmirror,
     "apkpure": apkpure,
     "uptodown": uptodown,
@@ -212,6 +213,9 @@ def download_platform(
                         f"No download link for {app_name} v{version} on {platform}"
                     )
                     continue
+                # apkeep returns a Path (already downloaded), others return a URL
+                if isinstance(download_link, Path):
+                    return download_link, version, candidates
                 filepath = download_resource(download_link)
                 return filepath, version, candidates
             except Exception as e:
@@ -273,6 +277,16 @@ def download_uptodown(
     override_version: str | None = None,
 ) -> tuple[Path | None, str | None, list[str]]:
     return download_platform(app_name, "uptodown", cli, patches, arch, override_version)
+
+
+def download_apkeep(
+    app_name: str,
+    cli: str,
+    patches: str,
+    arch: str | None = None,
+    override_version: str | None = None,
+) -> tuple[Path | None, str | None, list[str]]:
+    return download_platform(app_name, "apkeep", cli, patches, arch, override_version)
 
 
 def download_apkeditor() -> Path:
