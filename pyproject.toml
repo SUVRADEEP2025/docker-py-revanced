@@ -1,0 +1,17 @@
+[project]
+name = "morphe-autobuilds"
+version = "1.0.0"
+description = "Automated ReVanced/Morphe APK builder"
+requires-python = ">=3.11"
+dependencies = [
+    "boto3",
+    "PyGithub",
+    "beautifulsoup4",
+    "curl-cffi",
+    "requests",
+    "lxml",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

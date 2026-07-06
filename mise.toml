@@ -1,0 +1,7 @@
+[tools]
+uv = "latest"
+action-validator = "latest"
+actionlint = "latest"
+ruff = "latest"
+aube = "latest"
+biome = "latest"
