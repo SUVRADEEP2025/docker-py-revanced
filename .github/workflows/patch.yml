@@ -1,8 +1,5 @@
 name: Auto Build and Release Morphe
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 on:
   workflow_dispatch:
     inputs:
@@ -12,49 +9,14 @@ on:
         required: false
         default: false
   schedule:
-    - cron: '0 6 * * *'  # Daily at 6 AM UTC
+    - cron: '0 6 * * *'
 
 jobs:
-  download-tools:
-    name: Download Morphe Tools
-    runs-on: ubuntu-latest
-    if: ${{ false }}
-    outputs:
-      cache-key: ${{ steps.cache-key.outputs.cache-key }}
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.11
-      
-      - name: Download Morphe Tools
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          mkdir -p tools
-          curl -L "https://github.com/revanced/revanced-cli/releases/latest/download/revanced-cli-all.jar" -o tools/revanced-cli.jar
-          curl -L "https://github.com/revanced/revanced-patches/releases/latest/download/patches.jar" -o tools/patches.jar
-          curl -L "https://github.com/revanced/revanced-integrations/releases/latest/download/app-release-unsigned.apk" -o tools/integrations.apk
-      
-      - name: Cache Tools
-        uses: actions/cache@v4
-        id: cache-tools
-        with:
-          path: tools/
-          key: revanced-tools-${{ hashFiles('patch-config.json', 'arch-config.json') }}
-      
-      - name: Generate Cache Key
-        id: cache-key
-        run: echo "cache-key=${{ steps.cache-tools.outputs.cache-key || 'no-cache' }}" >> $GITHUB_OUTPUT
-
   check-updates:
     name: Check for Updates
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/jdx/mise:2026.9
     outputs:
       has_updates: ${{ steps.check.outputs.has_updates }}
       build_matrix: ${{ steps.check.outputs.build_matrix }}
@@ -64,34 +26,32 @@ jobs:
       incremental: ${{ steps.check.outputs.incremental }}
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - name: Bootstrap container deps
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update -qq
+          apt-get install -y -qq --no-install-recommends ca-certificates curl git unzip
+          rm -rf /var/lib/apt/lists/*
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+      - name: Checkout Repository
+        uses: actions/checkout@main
+
+      - name: Install mise tools
+        run: mise install
 
       - name: Validate GitHub Auth
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          python scripts/validate_github_auth.py
-
-      - name: Install Dependencies
-        run: |
-          pip install -r requirements.txt
-          pip install requests beautifulsoup4
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
+        run: mise exec -- bash scripts/validate-auth.sh
 
       - name: Run Incremental Update Check
         id: check
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
           FORCE_FULL_REBUILD: ${{ inputs.force_full_rebuild || 'false' }}
-        run: |
-          python scripts/check_app_updates.py
+        run: mise exec -- bash scripts/check-updates.sh
 
       - name: Show Plan Summary
         run: |
@@ -101,7 +61,7 @@ jobs:
           echo "Incremental:     ${{ steps.check.outputs.incremental }}"
 
       - name: Upload Plan Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@main
         with:
           name: build-plan
           path: |
@@ -121,7 +81,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@main
 
       - name: Use Build Matrix from Check
         id: read-matrix
@@ -144,51 +104,41 @@ jobs:
         ports:
           - 8191:8191
         options: --shm-size=1gb
+    container:
+      image: ghcr.io/jdx/mise:2026.9
     permissions:
       contents: write
     strategy:
       fail-fast: false
       matrix:
         include: ${{ fromJson(needs.patch-apps.outputs.matrix) }}
-    
+
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Restore Cached Tools
-        uses: actions/cache@v4
-        with:
-          path: tools/
-          key: revanced-tools-${{ hashFiles('patch-config.json', 'arch-config.json') }}
-
-      - name: Install Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.11
-
-      - name: Install Dependencies
+      - name: Bootstrap container deps
         run: |
-          pip install -r requirements.txt
-          pip install requests beautifulsoup4
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update -qq
+          apt-get install -y -qq --no-install-recommends ca-certificates curl git unzip
+          rm -rf /var/lib/apt/lists/*
 
-      - name: Setup Java 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '21'
+      - name: Checkout Repository
+        uses: actions/checkout@main
+
+      - name: Install mise tools
+        run: mise install
 
       - name: Build APK
         env:
           APP_NAME: ${{ matrix.app_name }}
           SOURCE: ${{ matrix.source }}
           ARCH: ${{ matrix.arch }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
           TRAWL_URL: http://localhost:8191
         run: |
           echo "Building ${{ matrix.app_name }} with ${{ matrix.source }}..."
           sleep $((RANDOM % 30)).$((RANDOM % 100))
-          
-          python -m src
+
+          mise exec -- bash scripts/build.sh build
 
       - name: Record Build Outputs
         if: always()
@@ -200,21 +150,20 @@ jobs:
           # Record every produced APK so manifest can map (app, source, arch) -> filename
           for apk in *.apk; do
             [ -e "$apk" ] || continue
-            # record_build.py now detects arch from filename automatically
-            APK_PATH="$apk" python scripts/record_build.py || true
+            APK_PATH="$apk" mise exec -- bash scripts/record-build.sh || true
           done
           echo "Records produced:"
           ls -la build_records/ 2>/dev/null || echo "(no records)"
 
       - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@main
         with:
           name: apk-${{ matrix.app_name }}-${{ matrix.source }}
           path: "*.apk"
 
       - name: Upload Build Records
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@main
         with:
           name: build-records-${{ matrix.app_name }}-${{ matrix.source }}
           path: build_records/
@@ -224,29 +173,41 @@ jobs:
     name: Create Single Release
     needs: [check-updates, build-apps]
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/jdx/mise:2026.9
     if: always() && needs.check-updates.outputs.has_updates == 'true'
     permissions:
       contents: write
 
     steps:
+      - name: Bootstrap container deps
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update -qq
+          apt-get install -y -qq --no-install-recommends ca-certificates curl git unzip
+          rm -rf /var/lib/apt/lists/*
+
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@main
+
+      - name: Install mise tools
+        run: mise install
 
       - name: Download Build Plan
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@main
         with:
           name: build-plan
           path: ./build-plan
         continue-on-error: true
 
       - name: Download All APK Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@main
         with:
           path: ./all-apks
           pattern: apk-*
 
       - name: Download All Build Records
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@main
         with:
           path: ./all-records
           pattern: build-records-*
@@ -265,7 +226,7 @@ jobs:
             echo "✅ $built_count rebuilt APK(s) ready for release"
             echo "skip_release=false" >> $GITHUB_OUTPUT
           fi
-      
+
       - name: Collect All APKs
         if: steps.check-apks.outputs.skip_release == 'false'
         run: |
@@ -292,8 +253,8 @@ jobs:
           if [ -d ./all-records ]; then
             find ./all-records -name "*.json" -exec cp {} build_records/ \; 2>/dev/null || true
           fi
-          python scripts/merge_manifest.py || {
-            echo "⚠️ merge_manifest.py failed; continuing without manifest update."
+          bash scripts/merge-manifest.sh || {
+            echo "⚠️ merge-manifest.sh failed; continuing without manifest update."
             rm -f manifest.json
           }
           if [ -f manifest.json ]; then
@@ -305,17 +266,17 @@ jobs:
       - name: Validate GitHub Auth
         if: steps.check-apks.outputs.skip_release == 'false'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
-          python scripts/validate_github_auth.py
+          bash scripts/validate-auth.sh
 
       - name: Check Existing Release
         if: steps.check-apks.outputs.skip_release == 'false'
         id: check-release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           if gh release view latest >/dev/null 2>&1; then
             echo "release_exists=true" >> "$GITHUB_OUTPUT"
@@ -324,12 +285,12 @@ jobs:
             echo "release_exists=false" >> "$GITHUB_OUTPUT"
             echo "📭 Release 'latest' does not exist; it will be created."
           fi
-      
+
       - name: Generate Release Notes
         if: steps.check-apks.outputs.skip_release == 'false'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           echo "📝 Generating release notes..."
 
@@ -352,9 +313,9 @@ jobs:
 
           cat > release_notes.md << 'EOF'
           # Morphe APKs - Auto Built
-          
+
           ## 📱 Available Apps
-          
+
           EOF
 
           while read -r filename; do
@@ -364,32 +325,32 @@ jobs:
 
           cat >> release_notes.md << 'EOF'
           ---
-          
+
           ## ⚙️ Build Information
           - **Auto-built daily at 6 AM UTC**
           - **Multiple architecture support** (arm64-v8a, armeabi-v7a, universal)
           - **Latest Morphe patches**
           - **Updated automatically**
-          
+
           ## 📊 Architecture Guide
           - **arm64-v8a**: Modern ARM devices (2014+)
           - **armeabi-v7a**: Older ARM devices
           - **universal**: All ARM devices (larger file)
-          
+
           ## ⚠️ Disclaimer
           These APKs are built automatically. Use at your own risk.
-          
+
           ## 🔄 Update Schedule
           - Automatic updates daily at 6 AM UTC
           - Manual updates available via workflow dispatch
           - Creates `latest` if missing and uploads rebuilt assets in place
           EOF
-      
+
       - name: Upload Or Create Release
         if: steps.check-apks.outputs.skip_release == 'false'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           echo "🚀 Publishing rebuilt assets to release..."
 
@@ -416,7 +377,7 @@ jobs:
             # Delete superseded older-version APKs. The previous loop only deleted
             # assets whose filename EXACTLY matched a new APK; since APK names
             # embed the version, old versions (e.g. v2.4.0) never matched the new
-            # v2.5.0 and accumulated forever. cleanup_old_apks.py deletes any
+            # v2.5.0 and accumulated forever. cleanup-apks.sh deletes any
             # release APK sharing a {app}-{arch}- identity prefix with a new APK
             # but with a different version.
             : > keep_apks.txt
@@ -424,8 +385,8 @@ jobs:
               [ -f "$apk" ] || continue
               basename "$apk" >> keep_apks.txt
             done
-            python scripts/cleanup_old_apks.py --release latest --keep-file keep_apks.txt || \
-              echo "⚠️  cleanup_old_apks.py failed; continuing with exact-name cleanup"
+            bash scripts/cleanup-apks.sh --release latest --keep-file keep_apks.txt || \
+              echo "⚠️  cleanup-apks.sh failed; continuing with exact-name cleanup"
 
             # Upload new APKs and manifest
             gh release upload latest "${ASSETS[@]}" --clobber
@@ -442,12 +403,11 @@ jobs:
           fi
 
           echo "✅ Release publish step completed successfully!"
-      
+
       - name: Display Release URL
         if: steps.check-apks.outputs.skip_release == 'false'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           release_url=$(gh release view latest --json url --jq .url)
           echo "🔗 Release URL: $release_url"
@@ -469,5 +429,5 @@ jobs:
       - name: Delete Old Workflow Runs
         uses: Mattraks/delete-workflow-runs@v2
         with:
-          retain_days: 3
-          keep_minimum_runs: 5
+          retain_days: 1
+          keep_minimum_runs: 2

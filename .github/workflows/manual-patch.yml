@@ -1,8 +1,5 @@
 name: Manual Patch and Update
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 on:
   workflow_dispatch:
     inputs:
@@ -27,7 +24,6 @@ on:
         type: choice
         options:
           - arm64-v8a
-          - armeabi-v7a
           - universal
         default: 'universal'
       replace_in_release:
@@ -45,13 +41,22 @@ jobs:
         ports:
           - 8191:8191
         options: --shm-size=1gb
+    container:
+      image: ghcr.io/jdx/mise:2026.9
     permissions:
       contents: write
-    
+
     steps:
+      - name: Bootstrap container deps
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update -qq
+          apt-get install -y -qq --no-install-recommends ca-certificates curl git unzip
+          rm -rf /var/lib/apt/lists/*
+
       - name: Checkout Repository
-        uses: actions/checkout@v4
-      
+        uses: actions/checkout@main
+
       - name: Set Specific Version (if provided)
         if: ${{ inputs.version != '' }}
         run: |
@@ -60,47 +65,29 @@ jobs:
             config_file="$dir/${{ inputs.app_name }}.json"
             if [ -f "$config_file" ]; then
               echo "Updating $config_file with version ${{ inputs.version }}"
-              # Update JSON with specific version
-              python -c "
-              import json, sys, os
-              with open('$config_file', 'r') as f:
-                  config = json.load(f)
-              config['version'] = '${{ inputs.version }}'
-              with open('$config_file', 'w') as f:
-                  json.dump(config, f, indent=2)
-              "
+              # Update JSON with specific version using jq
+              jq --arg v "${{ inputs.version }}" '.version = $v' "$config_file" > "$config_file.tmp" && mv "$config_file.tmp" "$config_file"
               echo "Updated: $config_file"
               break
             fi
           done
-      
-      - name: Install Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.11
-      
-      - name: Install Dependencies
-        run: |
-          pip install -r requirements.txt
-          pip install requests beautifulsoup4
-      
-      - name: Setup Java 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '21'
-      
+
+      - name: Install mise tools
+        run: mise install
+
       - name: Build APK
         env:
           APP_NAME: ${{ inputs.app_name }}
           SOURCE: ${{ inputs.source }}
           ARCH: ${{ inputs.architecture }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
           TRAWL_URL: http://localhost:8191
+          CLI: ./tools/revanced-cli.jar
+          PATCHES: ./tools/patches.jar
         run: |
           echo "🔧 Building ${{ inputs.app_name }} with ${{ inputs.source }} for ${{ inputs.architecture }} architecture..."
-          python -m src
-      
+          mise exec -- bash scripts/build.sh build
+
       - name: Find Built APK
         id: find-apk
         run: |
@@ -110,31 +97,31 @@ jobs:
             echo "❌ No APK files found"
             exit 1
           fi
-          
+
           # Fix for multi-line output in GitHub Actions
           {
             echo "apk_files<<EOF"
             echo "$apk_files"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
-          
+
           echo "apk_count=$(echo "$apk_files" | wc -l)" >> "$GITHUB_OUTPUT"
-          
+
           # Print for debugging
           echo "Found these APKs:"
           echo "$apk_files"
-      
+
       - name: Upload as Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@main
         with:
           name: manual-apk-${{ inputs.app_name }}-${{ inputs.architecture }}
           path: "*.apk"
-      
+
       - name: Check Existing Release
         if: ${{ inputs.replace_in_release == true }}
         id: check-release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           if gh release view latest >/dev/null 2>&1; then
             echo "✅ Release 'latest' exists"
@@ -143,14 +130,14 @@ jobs:
             echo "❌ Release 'latest' does not exist"
             echo "release_exists=false" >> $GITHUB_OUTPUT
           fi
-      
+
       - name: Update Release
         if: ${{ inputs.replace_in_release == true }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           echo "🔄 Updating release efficiently..."
-          
+
           # 1. GENERATE FILE LIST FOR NOTES
           # We fetch the list of names via API so the release notes remain accurate
           # without needing to download the actual heavy APK files.
@@ -159,36 +146,36 @@ jobs:
           else
             touch current_assets.txt
           fi
-          
+
           # Add the new APK name(s) to the text file
           for apk in *.apk; do
             echo "$apk" >> current_assets.txt
           done
-          
+
           # 2. CREATE RELEASE NOTES
           cat > release_notes.md << EOF
           # Morphe APKs
-          
+
           ## 📱 Available Apps
           EOF
-          
+
           # Sort and use 'unique' to remove duplicates in the text list
-          sort -u current_assets.txt | while read filename; do
+          sort -u current_assets.txt | while read -r filename; do
             echo "- $filename" >> release_notes.md
           done
-          
+
           cat >> release_notes.md << EOF
-          
+
           ---
-          
+
           **Last Update:** $(date)
           **Updated App:** ${{ inputs.app_name }}
           **Architecture:** ${{ inputs.architecture }}
           **Source:** ${{ inputs.source }}
-          
+
           Auto-updates daily at 6 AM UTC.
           EOF
-          
+
           # 3. PERFORM UPDATE (CLOBBER) OR CREATE
           if [ "${{ steps.check-release.outputs.release_exists }}" == "true" ]; then
             echo "⬆️ Uploading new assets (clobbering existing)..."
@@ -204,7 +191,7 @@ jobs:
               [ -f "$apk" ] || continue
               echo "$apk" >> keep_apks.txt
             done
-            python scripts/cleanup_old_apks.py --release latest --keep-file keep_apks.txt || \
+            bash scripts/cleanup-apks.sh --release latest --keep-file keep_apks.txt || \
               echo "⚠️  cleanup_old_apks.py failed; continuing with clobber upload"
 
             # --clobber overwrites the file if it exists, adds it if it doesn't
@@ -214,7 +201,7 @@ jobs:
             gh release edit latest \
               --title "Morphe APKs - $(date +'%Y-%m-%d %H:%M')" \
               --notes-file release_notes.md
-              
+
           else
             echo "🚀 Creating new release..."
             gh release create "latest" \
@@ -223,13 +210,13 @@ jobs:
               *.apk \
               --latest
           fi
-          
+
           echo "✅ Release updated successfully!"
-      
+
       - name: Show Download Links
         if: ${{ inputs.replace_in_release == true }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           release_url=$(gh release view latest --json url --jq .url)
           echo "🔗 Updated Release URL: $release_url"
@@ -238,7 +225,7 @@ jobs:
           for apk in *.apk; do
             echo "  - $release_url/download/$apk"
           done
-      
+
       - name: Cleanup Version Override
         if: ${{ inputs.version != '' && always() }}
         run: |
@@ -247,13 +234,6 @@ jobs:
             config_file="$dir/${{ inputs.app_name }}.json"
             if [ -f "$config_file" ]; then
               echo "Resetting version in $config_file"
-              python -c "
-              import json, sys, os
-              with open('$config_file', 'r') as f:
-                  config = json.load(f)
-              config['version'] = ''
-              with open('$config_file', 'w') as f:
-                  json.dump(config, f, indent=2)
-              "
+              jq '.version = ""' "$config_file" > "$config_file.tmp" && mv "$config_file.tmp" "$config_file"
             fi
           done

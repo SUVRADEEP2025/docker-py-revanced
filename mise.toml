@@ -1,0 +1,15 @@
+[tools]
+jq = "latest"
+just = "latest"
+gh = "latest"
+# APK downloader — replaces ad-hoc scraper/download paths for store APKs.
+"github:EFForg/apkeep" = "latest"
+shellcheck = "latest"
+# Java for running Morphe/ReVanced CLI
+java = { version = "21", flavour = "temurin" }
+
+[env]
+# Build output directory
+BUILD_DIR = "./build"
+# Tools directory for downloaded CLI/patches
+TOOLS_DIR = "./tools"

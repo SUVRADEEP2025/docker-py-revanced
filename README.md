@@ -4,7 +4,6 @@
 
 [![Daily Build](https://img.shields.io/github/actions/workflow/status/RookieEnough/Revanced-AutoBuilds/patch.yml?label=Daily%20Build&style=for-the-badge&color=2ea44f)](https://github.com/RookieEnough/Revanced-AutoBuilds/actions/workflows/patch.yml)
 [![Latest Release](https://img.shields.io/github/v/release/RookieEnough/Revanced-AutoBuilds?style=for-the-badge&label=Latest%20Release&color=0366d6)](https://github.com/RookieEnough/Revanced-AutoBuilds/releases/latest)
-[![Python Version](https://img.shields.io/badge/Python-3.11%2B-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![License](https://img.shields.io/github/license/RookieEnough/Revanced-AutoBuilds?style=for-the-badge&color=orange)](LICENSE)
 
 
@@ -63,7 +62,7 @@ A sophisticated, automated pipeline that builds ready-to-install Morphe applicat
 
 ## ✨ Key Features
 
-This repository utilizes a robust Python-based pipeline to ensure high reliability and optimization.
+This repository utilizes a robust bash-based pipeline (run via mise + just) to ensure high reliability and optimization.
 
 * **Fully Automated:** GitHub Actions workflow executes daily at 06:00 UTC, requiring zero manual intervention.
 * **Architecture Optimization:** Builds specific `arm64-v8a`, `armeabi-v7a`, and `universal` APKs to reduce file size and improve performance on target devices.
@@ -88,10 +87,11 @@ revanced-nonroot/
 │   └── uptodown/           # UptoDown definitions
 ├── patches/                # Patch inclusion/exclusion rules
 ├── sources/                # ReVanced tool source definitions
-├── src/                    # Core Python build logic
+├── scripts/                # Core bash build logic
+├── mise.toml               # Toolchain (Java, gh, jq, apkeep, ...) + build env
+├── justfile                # Task runner (build, check-updates, ...)
 ├── arch-config.json        # Architecture build matrix
-├── patch-config.json       # App build configuration
-└── requirements.txt        # Project dependencies
+└── patch-config.json       # App build configuration
 
 ```
 
@@ -177,10 +177,8 @@ If you prefer to build the APKs on your own machine, follow these steps.
 
 ### Prerequisites
 
-* Python 3.11 or higher
-* Java Runtime Environment (JRE)
-* `zip` utility
-* `apksigner` (part of Android SDK Build-Tools)
+* [mise](https://mise.jdx.dev) (installs Java 21, gh, jq, apkeep, just, shellcheck)
+* `zip`/`unzip` utilities
 
 ### Installation & Execution
 
@@ -192,10 +190,9 @@ cd morphe-nonroot
 ```
 
 
-2. **Install dependencies:**
+2. **Install tools (via mise):**
 ```bash
-pip install -r requirements.txt
-pip install requests beautifulsoup4
+mise install
 
 ```
 
@@ -205,7 +202,7 @@ You can build for a specific app and source.
 ```bash
 export APP_NAME="youtube"
 export SOURCE="morphe"
-python -m src
+just build
 
 ```
 
@@ -215,7 +212,7 @@ python -m src
 export APP_NAME="youtube"
 export SOURCE="morphe"
 export ARCH="arm64-v8a"  # Options: arm64-v8a, armeabi-v7a, universal
-python -m src
+just build
 
 ```
 
@@ -250,7 +247,7 @@ Contributions to improve the toolchain or add support for new apps are welcome.
 
 1. **Fork** the repository.
 2. **Create** a feature branch (`git checkout -b feature/new-app`).
-3. **Test** your changes locally using the Python scripts.
+3. **Test** your changes locally using the bash scripts (`just build`, `just check-updates`).
 4. **Commit** your changes (`git commit -m "Add support for new-app"`).
 5. **Push** to the branch (`git push origin feature/new-app`).
 6. **Open** a Pull Request.
